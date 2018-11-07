@@ -38,6 +38,33 @@ void InputProcessor::subscribeOnKey(
     subscribeOnKey(key, onKeyPress, nullptr, onKeyRelease);
 }
 
+void InputProcessor::subscribeOnKey(Key key, const std::function<void()> onKeyPress, const std::function<void()> onKeyHold, const std::function<void()> onKeyRelease)
+{
+    if (onKeyPress) {
+        keyPressSubscriptions[key].push_back(
+            [onKeyPress](const KeyEvent&) {
+                onKeyPress();
+            });
+    }
+    if (onKeyHold) {
+        keyHoldSubscriptions[key].push_back(
+            [onKeyHold](const KeyEvent&) {
+                onKeyHold();
+            });
+    }
+    if (onKeyRelease) {
+        keyReleaseSubscriptions[key].push_back(
+            [onKeyRelease](const KeyEvent&) {
+                onKeyRelease();
+            });
+    }
+}
+
+void InputProcessor::subscribeOnKey(Key key, const std::function<void()> onKeyPress, const std::function<void()> onKeyRelease)
+{
+    subscribeOnKey(key, onKeyPress, nullptr, onKeyRelease);
+}
+
 void InputProcessor::onModuleCreation()
 {
     subscriptionId = eventsProcessor->subscribeOnEvent<KeyEvent>(

@@ -5,6 +5,8 @@
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
 
+using namespace game_math;
+
 GameObject::GameObject(const Vector2F& position, const Vector2F& size)
     : position(position)
     , size(size)
@@ -20,6 +22,20 @@ GameObject::~GameObject()
 void GameObject::addChild(const std::shared_ptr<GameObject>& child)
 {
     children.insert(child);
+
+    if (auto p = child->getParent()) {
+        p->removeChild(child);
+    }
+
+    child->parent = this;
+}
+
+void GameObject::removeChild(const std::shared_ptr<GameObject>& child)
+{
+    if (auto p = child->getParent()) {
+        p->parent = nullptr;
+    }
+    children.erase(child);
 }
 
 const std::unordered_set<std::shared_ptr<GameObject>>& GameObject::getChildren() const
@@ -88,4 +104,9 @@ void GameObject::setSpeed(const Vector2F& value)
 void GameObject::addSpeed(const Vector2F& value)
 {
     speed += value;
+}
+
+GameObject* GameObject::getParent() const
+{
+    return parent;
 }

@@ -21,41 +21,12 @@ int main()
         auto eventsProcessor = std::dynamic_pointer_cast<EventsProcessor>(
             core->addModuleOfType<SDLEventsProcessor>());
 
-        /*eventsProcessor->subscribeOnEvent<KeyEvent>([](const KeyEvent& event) {
-            std::cout
-                << "Key event happened: "
-                << int(event.key)
-                << ", "
-                << bool(event.keyState)
-                << std::endl;
-        });*/
-
         auto inputProcessor = std::dynamic_pointer_cast<InputProcessor>(
             core->addModuleOfType<InputProcessor>(eventsProcessor));
 
-        inputProcessor->subscribeOnKey(
-            Key::W,
-            [](const KeyEvent&) {
-                std::cout << "W pressed" << std::endl;
-            },
-            [](const KeyEvent&) {
-                std::cout << "W is held" << std::endl;
-            },
-            [](const KeyEvent&) {
-                std::cout << "W released" << std::endl;
-            });
-
-        inputProcessor->subscribeOnKey(
-            Key::W,
-            [](const auto&) {
-                std::cout << "W pressed 2" << std::endl;
-            },
-            [](const auto&) {
-                std::cout << "W released 2" << std::endl;
-            });
-
         auto scene = std::dynamic_pointer_cast<Scene>(
-            core->addModuleOfType<SceneExample>(window));
+            core->addModuleOfType<SceneExample>(
+                window, inputProcessor));
 
         core->addModuleOfType<PhysicsProcessor>(scene);
 

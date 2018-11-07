@@ -2,7 +2,7 @@
 #define SCENERENDERER_H
 
 #include "Module.h"
-#include "Vector.h"
+#include "game_math/Vector.hpp"
 
 #include <memory>
 
@@ -21,7 +21,7 @@ public:
 private:
     void renderObject(
         const std::shared_ptr<GameObject>& object,
-        const Vector2F& parentCoordinates) const;
+        const game_math::Vector2F& parentCoordinates) const;
 
     std::shared_ptr<Scene> scene;
     std::shared_ptr<SDLWindow> sdlWindow;

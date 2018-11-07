@@ -28,6 +28,17 @@ public:
         const std::function<void(const KeyEvent& event)> onKeyPress,
         const std::function<void(const KeyEvent& event)> onKeyRelease);
 
+    void subscribeOnKey(
+        Key key,
+        const std::function<void()> onKeyPress,
+        const std::function<void()> onKeyHold,
+        const std::function<void()> onKeyRelease);
+
+    void subscribeOnKey(
+        Key key,
+        const std::function<void()> onKeyPress,
+        const std::function<void()> onKeyRelease);
+
     virtual void onModuleCreation() override;
 
     virtual void onModuleDestruction() override;

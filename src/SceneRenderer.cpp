@@ -3,9 +3,11 @@
 #include "GameObject.h"
 #include "SDLWindow.h"
 #include "Scene.h"
-#include "Vector.h"
+#include "game_math/Vector.hpp"
 
 #include "SDL2/SDL.h"
+
+using namespace game_math;
 
 SceneRenderer::SceneRenderer(
     const std::shared_ptr<Scene>& scene,

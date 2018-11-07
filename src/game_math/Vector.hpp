@@ -3,6 +3,8 @@
 #include <array>
 #include <iostream>
 
+namespace game_math {
+
 template <typename Type, std::size_t Size>
 class Vector {
 public:
@@ -16,6 +18,7 @@ public:
     Vector<Type, Size> operator-(const Vector<Type, Size>& other) const;
 
     Vector<Type, Size> operator*(Type value) const;
+    Vector<Type, Size> operator/(Type value) const;
 
     Vector<Type, Size>& operator+=(const Vector<Type, Size>& other);
     Vector<Type, Size>& operator-=(const Vector<Type, Size>& other);
@@ -81,6 +84,16 @@ Vector<Type, Size> Vector<Type, Size>::operator*(Type value) const
 }
 
 template <typename Type, std::size_t Size>
+Vector<Type, Size> Vector<Type, Size>::operator/(Type value) const
+{
+    Vector<Type, Size> result = *this;
+    for (Type& item : result.data) {
+        item /= value;
+    }
+    return result;
+}
+
+template <typename Type, std::size_t Size>
 Vector<Type, Size>& Vector<Type, Size>::operator+=(const Vector<Type, Size>& other)
 {
     for (size_t i = 0; i < Size; ++i) {
@@ -130,3 +143,5 @@ public:
 
 using Vector2D = Vector2<double>;
 using Vector2F = Vector2<float>;
+
+}
