@@ -16,6 +16,13 @@ Core* Core::getCore()
     return core;
 }
 
+Core::~Core()
+{
+    for (const auto& module : modules) {
+        module->onModuleDestruction();
+    }
+}
+
 void Core::loop()
 {
     using clock = std::chrono::high_resolution_clock;

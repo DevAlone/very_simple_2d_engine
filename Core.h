@@ -1,15 +1,16 @@
 #ifndef CORE_H
 #define CORE_H
 
+#include "Module.h"
+
 #include <memory>
 #include <type_traits>
 #include <vector>
 
-class Module;
-
 class Core {
 public:
     static Core* getCore();
+    ~Core();
 
     template <typename T, typename... Args>
     std::shared_ptr<Module> addModuleOfType(Args... args);
@@ -33,7 +34,7 @@ std::shared_ptr<Module> Core::addModuleOfType(Args... args)
     static_assert(std::is_base_of<Module, T>::value, "have to be subclass of Module");
 
     auto module = std::make_shared<T>(args...);
-    module->onModuleCreated();
+    module->onModuleCreation();
     modules.push_back(module);
     return module;
 }

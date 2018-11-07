@@ -4,18 +4,24 @@
 #include <cstdint>
 
 class Module {
+
 public:
     Module();
     virtual ~Module() {}
 
     /**
-     * @brief onModuleCreated - called on module creation
+     * @brief onModuleCreation - called on module creation
      */
-    virtual void onModuleCreated() {}
+    virtual void onModuleCreation() {}
+
+    /**
+     * @brief onModuleDestruction - called on module destroy
+     */
+    virtual void onModuleDestruction() {}
 
     /**
      * @brief processFrame - called for each module per each frame
-     * @param deltaTime - time in microseconds
+     * @param deltaTime - time in microseconds since previous frame
      */
     virtual void processFrame(int32_t deltaTime);
 };

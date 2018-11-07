@@ -13,7 +13,7 @@ SDLWindow::SDLWindow(const unsigned width, const unsigned height)
 {
 }
 
-void SDLWindow::onModuleCreated()
+void SDLWindow::onModuleCreation()
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         throw Exception(
@@ -42,7 +42,7 @@ void SDLWindow::onModuleCreated()
 
 void SDLWindow::processFrame(int32_t)
 {
-    processEvents();
+    // processEvents();
 }
 
 SDLWindow::~SDLWindow()
@@ -66,51 +66,4 @@ unsigned SDLWindow::getWidth() const
 unsigned SDLWindow::getHeight() const
 {
     return height;
-}
-
-void SDLWindow::subscribeOnKeyPress(SDL_Keycode keyCode, const std::function<void()>& callback)
-{
-    keyPressSubscriptions[keyCode].push_back(callback);
-}
-
-void SDLWindow::subscribeOnKeyRelease(SDL_Keycode keyCode, const std::function<void()>& callback)
-{
-    keyReleaseSubscriptions[keyCode].push_back(callback);
-}
-
-void SDLWindow::processEvents()
-{
-    SDL_Event event;
-
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_QUIT:
-            Core::getCore()->requestExit();
-            break;
-        case SDL_KEYDOWN: {
-            SDL_Keycode keyCode = event.key.keysym.sym;
-            if (keyCode == SDLK_ESCAPE) {
-                Core::getCore()->requestExit();
-            }
-
-            auto it = keyPressSubscriptions.find(keyCode);
-            if (it != keyPressSubscriptions.end() && !keyStates[keyCode]) {
-                for (const auto& function : it->second) {
-                    function();
-                }
-            }
-            keyStates[keyCode] = true;
-        } break;
-        case SDL_KEYUP: {
-            SDL_Keycode keyCode = event.key.keysym.sym;
-            auto it = keyReleaseSubscriptions.find(keyCode);
-            if (it != keyReleaseSubscriptions.end()) {
-                for (const auto& function : it->second) {
-                    function();
-                }
-            }
-            keyStates[keyCode] = false;
-        } break;
-        }
-    }
 }

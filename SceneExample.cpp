@@ -38,7 +38,7 @@ SceneExample::SceneExample(const std::shared_ptr<SDLWindow>& window)
 
     mario->addSpeed({ 0, -9.8f });
 
-    window->subscribeOnKeyPress(SDLK_SPACE, [this]() {
+    /*window->subscribeOnKeyPress(SDLK_SPACE, [this]() {
         mario->getPositionRef().getYRef() += moveCoefficient;
     });
 
@@ -68,5 +68,5 @@ SceneExample::SceneExample(const std::shared_ptr<SDLWindow>& window)
     });
     window->subscribeOnKeyRelease(SDLK_d, [this]() {
         mario->addSpeed({ -moveCoefficient, 0 });
-    });
+    });*/
 }
