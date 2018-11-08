@@ -14,8 +14,8 @@ public:
         const std::shared_ptr<InputProcessor>& inputProcessor);
 
 private:
-    std::shared_ptr<GameObject> rootObject;
     std::shared_ptr<GameObject> mario;
+    std::shared_ptr<GameObject> rootObject;
     const float moveCoefficient = 50;
 };
 

@@ -28,15 +28,13 @@ void SceneRenderer::processFrame(int32_t)
     SDL_RenderClear(renderer);
 
     if (scene) {
-        renderObject(scene->getRootObject(), { 0, 0 });
+        renderObject(scene->getRootObject());
     }
 
     SDL_RenderPresent(renderer);
 }
 
-void SceneRenderer::renderObject(
-    const std::shared_ptr<GameObject>& object,
-    const Vector2F& parentCoordinates) const
+void SceneRenderer::renderObject(const std::shared_ptr<GameObject>& object) const
 {
     if (!object)
         return;
@@ -45,8 +43,6 @@ void SceneRenderer::renderObject(
     // TODO: render
     auto position = object->getPosition();
     auto size = object->getSize();
-
-    position += parentCoordinates;
 
     // SDL_QueryTexture(texture, nullptr, &width, &height);
     SDL_Rect rect;
@@ -78,6 +74,6 @@ void SceneRenderer::renderObject(
     }
 
     for (const auto& child : object->getChildren()) {
-        renderObject(child, position);
+        renderObject(child);
     }
 }

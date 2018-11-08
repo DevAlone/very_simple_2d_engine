@@ -17,6 +17,10 @@ GameObject::~GameObject()
 {
     if (texture)
         SDL_DestroyTexture(texture);
+
+    for (const auto& child : children) {
+        child->parent = nullptr;
+    }
 }
 
 void GameObject::addChild(const std::shared_ptr<GameObject>& child)
@@ -28,13 +32,21 @@ void GameObject::addChild(const std::shared_ptr<GameObject>& child)
     }
 
     child->parent = this;
+
+    std::vector<std::shared_ptr<GameObject>> grandchildrenToRemove;
+    for (const auto& grandchild : child->getChildren()) {
+        if (objectsTreeContainsItem(grandchild, child)) {
+            grandchildrenToRemove.push_back(grandchild);
+        }
+    }
+    for (const auto& grandchild : grandchildrenToRemove) {
+        child->removeChild(grandchild);
+    }
 }
 
 void GameObject::removeChild(const std::shared_ptr<GameObject>& child)
 {
-    if (auto p = child->getParent()) {
-        p->parent = nullptr;
-    }
+    child->parent = nullptr;
     children.erase(child);
 }
 
@@ -109,4 +121,23 @@ void GameObject::addSpeed(const Vector2F& value)
 GameObject* GameObject::getParent() const
 {
     return parent;
+}
+
+bool GameObject::objectsTreeContainsItem(
+    const std::shared_ptr<GameObject>& root,
+    const std::shared_ptr<GameObject>& object)
+{
+    if (!root || !object)
+        return false;
+
+    if (root == object)
+        return true;
+
+    for (const auto& child : root->getChildren()) {
+        if (GameObject::objectsTreeContainsItem(child, object)) {
+            return true;
+        }
+    }
+
+    return false;
 }

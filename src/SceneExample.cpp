@@ -24,14 +24,14 @@ SceneExample::SceneExample(
         "/home/user/projects/sdl_example/mario.bmp",
         window->getSdlRenderer());
 
-    /*auto marioChild = std::make_shared<GameObject>(
-        Vector2F(50, 50), Vector2F(50, 50));
+    auto marioChild = std::make_shared<GameObject>(
+        Vector2F(100, 50), Vector2F(50, 50));
 
     marioChild->setTextureFromFile(
         "/home/user/projects/sdl_example/mario.jpg",
-        window);
+        window->getSdlRenderer());
 
-    mario->addChild(marioChild);*/
+    mario->addChild(marioChild);
 
     rootObject->addChild(mario);
     setRootObject(rootObject);

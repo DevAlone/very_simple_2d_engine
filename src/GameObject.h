@@ -53,6 +53,16 @@ public:
     GameObject* getParent() const;
 
 private:
+    /**
+     * @brief objectsTreeContainItem - looks for object in tree
+     * @param root - tree root
+     * @param object - object to find
+     * @return true if object found false if not
+     */
+    static bool objectsTreeContainsItem(
+        const std::shared_ptr<GameObject>& root,
+        const std::shared_ptr<GameObject>& object);
+
     GameObject* parent = nullptr;
     std::unordered_set<std::shared_ptr<GameObject>> children;
     game_math::Vector2F position;

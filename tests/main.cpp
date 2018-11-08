@@ -65,7 +65,22 @@ TEST_CASE("GameObjects reparenting", "[GameObject]")
     CHECK(obj2->getParent() == nullptr);
     CHECK(obj3->getParent() == obj2.get());
 
-    CHECK(obj1->getChildren().size() == 1);
-    CHECK(obj2->getChildren().size() == 0);
+    CHECK(obj1->getChildren().size() == 0);
+    CHECK(obj2->getChildren().size() == 1);
     CHECK(obj3->getChildren().size() == 1);
+
+    obj1 = std::make_shared<GameObject>(
+        Vector2F(0, 0), Vector2F(0, 0));
+    obj2 = std::make_shared<GameObject>(
+        Vector2F(0, 0), Vector2F(0, 0));
+
+    obj1->addChild(obj2);
+
+    CHECK(obj1->getParent() == nullptr);
+    CHECK(obj2->getParent() == obj1.get());
+
+    obj2->addChild(obj1);
+
+    CHECK(obj1->getParent() == obj2.get());
+    CHECK(obj2->getParent() == nullptr);
 }

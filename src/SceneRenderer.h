@@ -19,9 +19,7 @@ public:
     virtual void processFrame(int32_t deltaTime) override;
 
 private:
-    void renderObject(
-        const std::shared_ptr<GameObject>& object,
-        const game_math::Vector2F& parentCoordinates) const;
+    void renderObject(const std::shared_ptr<GameObject>& object) const;
 
     std::shared_ptr<Scene> scene;
     std::shared_ptr<SDLWindow> sdlWindow;
