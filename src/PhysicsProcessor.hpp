@@ -5,10 +5,12 @@
 #include "Module.h"
 #include "PhysicsGameObject.hpp"
 #include "Scene.hpp"
+#include "game_math/game_math.h"
 
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 /**
  * @brief processes physics for object inside the scene
@@ -20,6 +22,7 @@ public:
     PhysicsProcessor(const std::shared_ptr<Scene<SIZE, Type>>& scene);
 
     virtual void processFrame(int32_t deltaTime) override;
+    void addAccelerationForAllObjects(const game_math::Vector<SIZE, Type>& acceleration);
 
 private:
     void processPhysicsForObject(
@@ -27,6 +30,7 @@ private:
         const std::shared_ptr<GameObject<SIZE, Type>>& object);
 
     const std::shared_ptr<Scene<SIZE, Type>> scene;
+    game_math::Vector<SIZE, Type> accelerations = game_math::Vector<SIZE, Type>(Type());
 };
 
 template <std::size_t SIZE, typename Type>
@@ -46,6 +50,16 @@ void PhysicsProcessor<SIZE, Type>::processFrame(int32_t deltaTime)
 }
 
 template <std::size_t SIZE, typename Type>
+void PhysicsProcessor<SIZE, Type>::addAccelerationForAllObjects(
+    const game_math::Vector<SIZE, Type>& acceleration)
+{
+    accelerations += acceleration;
+}
+
+#include <iostream>
+#include <unistd.h>
+
+template <std::size_t SIZE, typename Type>
 void PhysicsProcessor<SIZE, Type>::processPhysicsForObject(
     int32_t deltaTime, const std::shared_ptr<GameObject<SIZE, Type>>& object)
 {
@@ -53,17 +67,35 @@ void PhysicsProcessor<SIZE, Type>::processPhysicsForObject(
         return;
     }
 
-    if (auto physicsObject = std::dynamic_pointer_cast<PhysicsGameObject<SIZE, Type>>(object)) {
-        physicsObject->getPositionRef() += physicsObject->getSpeed() * (Type(deltaTime) / Type(1000000));
+    Type k = Type(deltaTime) / Type(1000000);
 
-        game_math::Vector<SIZE, Type>& position = physicsObject->getPositionRef();
+    if (auto physicsObject = std::dynamic_pointer_cast<PhysicsGameObject<SIZE, Type>>(object)) {
+        // apply global accelerations
+        physicsObject->getSpeedRef() += accelerations * k;
+
+        // apply objects accelerations
+
+        physicsObject->getSpeedRef() += physicsObject->getAcceleration() * k;
+
+        physicsObject->getPositionRef() += physicsObject->getSpeed() * k;
 
         // limit to scene area
+        game_math::Vector<SIZE, Type>& position = physicsObject->getPositionRef();
+
         for (size_t i = 0; i < SIZE; ++i) {
+            bool hit = false;
+
             if (position[i] < Type()) {
                 position[i] = Type();
+                hit = true;
             } else if (position[i] > scene->getSize()[i]) {
                 position[i] = scene->getSize()[i];
+                hit = true;
+            }
+
+            if (hit) {
+                // physicsObject->getSpeedRef()[i] = Type();
+                physicsObject->getSpeedRef() = game_math::Vector<SIZE, Type>(Type());
             }
         }
     }

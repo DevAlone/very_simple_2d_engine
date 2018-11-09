@@ -28,7 +28,11 @@ int main()
             core->addModuleOfType<SceneExample>(
                 window, inputProcessor));
 
-        core->addModuleOfType<PhysicsProcessor<2, float>>(scene);
+        auto physicsProcessor = std::dynamic_pointer_cast<PhysicsProcessor<2, float>>(
+            core->addModuleOfType<PhysicsProcessor<2, float>>(scene));
+
+        // physicsProcessor->addAccelerationForAllObjects({ 0, -9.86f });
+        physicsProcessor->addAccelerationForAllObjects({ 0, -300.0f });
 
         core->addModuleOfType<Scene2Renderer<float>>(scene, window);
 

@@ -6,10 +6,14 @@
 
 namespace game_math {
 
+/**
+ * @brief class for representing vectors of any size
+ * with any base type, NOT initialized by zeros
+ */
 template <std::size_t Size, typename Type>
 class Vector {
 public:
-    Vector() = default;
+    explicit Vector(const Type& defaultValue);
     Vector(const std::array<Type, Size>& array);
     Vector(std::initializer_list<Type> initializerList);
 
@@ -30,11 +34,18 @@ protected:
 };
 
 template <std::size_t Size, typename Type>
+Vector<Size, Type>::Vector(const Type& defaultValue)
+{
+    data.fill(defaultValue);
+}
+
+template <std::size_t Size, typename Type>
 Vector<Size, Type>::Vector(
     const std::array<Type, Size>& array)
     : data(array)
 {
 }
+
 template <std::size_t Size, typename Type>
 Vector<Size, Type>::Vector(std::initializer_list<Type> initializerList)
 {
@@ -152,7 +163,7 @@ std::ostream& operator<<(std::ostream& stream, const Vector<Size, Type>& vector)
     return stream << "]";
 }
 
-template <typename Type>
+/*template <typename Type>
 class Vector2 : public Vector<2, Type> {
 public:
     Vector2(Type x = 0, Type y = 0)
@@ -166,8 +177,8 @@ public:
     Type& getYRef() { return this->data[1]; }
     void setX(Type value) { this->data[0] = value; }
     void setY(Type value) { this->data[1] = value; }
-};
+};*/
 
-using Vector2D = Vector2<double>;
-using Vector2F = Vector2<float>;
+using Vector2D = Vector<2, double>;
+using Vector2F = Vector<2, float>;
 }

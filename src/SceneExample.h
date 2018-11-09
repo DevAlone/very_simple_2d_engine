@@ -17,7 +17,7 @@ public:
 private:
     std::shared_ptr<GameObject2F> rootObject;
     std::shared_ptr<PhysicsGameObject2F> mario;
-    const float moveCoefficient = 50;
+    const float moveCoefficient = 10;
 };
 
 #endif // SCENEEXAMPLE_H

@@ -23,11 +23,11 @@ TEST_CASE("Vectors operations", "[Vector]")
         Vector2F { 1.5, 2 }));
 
     CHECK(nearlyEqual(
-        Vector2F { 1.5, 2.5 } + Vector2F(-1.5, -10),
+        Vector2F { 1.5, 2.5 } + Vector2F { -1.5, -10.0 },
         Vector2F { 0, -7.5 }));
 
     CHECK(nearlyEqual(
-        Vector2F { -10, 0 } - Vector2F(-1.5, -10),
+        Vector2F { -10, 0 } - Vector2F { -1.5, -10 },
         Vector2F { -8.5, 10 }));
 }
 
