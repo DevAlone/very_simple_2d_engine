@@ -1,7 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-#include "../src/GameObject.h"
+#include "../src/GameObject.hpp"
 #include "../src/game_math/game_math.h"
 
 #include <memory>
@@ -33,12 +33,9 @@ TEST_CASE("Vectors operations", "[Vector]")
 
 TEST_CASE("GameObjects reparenting", "[GameObject]")
 {
-    auto obj1 = std::make_shared<GameObject>(
-        Vector2F(0, 0), Vector2F(0, 0));
-    auto obj2 = std::make_shared<GameObject>(
-        Vector2F(0, 0), Vector2F(0, 0));
-    auto obj3 = std::make_shared<GameObject>(
-        Vector2F(0, 0), Vector2F(0, 0));
+    auto obj1 = std::make_shared<GameObject<2, float>>();
+    auto obj2 = std::make_shared<GameObject<2, float>>();
+    auto obj3 = std::make_shared<GameObject<2, float>>();
 
     CHECK(obj1->getParent() == nullptr);
     CHECK(obj2->getParent() == nullptr);
@@ -69,10 +66,8 @@ TEST_CASE("GameObjects reparenting", "[GameObject]")
     CHECK(obj2->getChildren().size() == 1);
     CHECK(obj3->getChildren().size() == 1);
 
-    obj1 = std::make_shared<GameObject>(
-        Vector2F(0, 0), Vector2F(0, 0));
-    obj2 = std::make_shared<GameObject>(
-        Vector2F(0, 0), Vector2F(0, 0));
+    obj1 = std::make_shared<GameObject<2, float>>();
+    obj2 = std::make_shared<GameObject<2, float>>();
 
     obj1->addChild(obj2);
 

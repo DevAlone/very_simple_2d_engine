@@ -2,7 +2,6 @@
 #include "Core.h"
 #include "Exception.h"
 #include "SDL2/SDL.h"
-#include "Scene.h"
 
 #include <chrono>
 #include <iostream>
@@ -42,7 +41,6 @@ void SDLWindow::onModuleCreation()
 
 void SDLWindow::processFrame(int32_t)
 {
-    // processEvents();
 }
 
 SDLWindow::~SDLWindow()

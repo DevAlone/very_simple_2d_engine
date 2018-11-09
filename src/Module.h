@@ -1,5 +1,4 @@
-#ifndef MODULE_H
-#define MODULE_H
+#pragma once
 
 #include <cstdint>
 
@@ -25,5 +24,3 @@ public:
      */
     virtual void processFrame(int32_t deltaTime);
 };
-
-#endif // MODULE_H

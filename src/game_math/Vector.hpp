@@ -1,60 +1,87 @@
 #pragma once
 
 #include <array>
+#include <initializer_list>
 #include <iostream>
 
 namespace game_math {
 
-template <typename Type, std::size_t Size>
+template <std::size_t Size, typename Type>
 class Vector {
 public:
-    Vector() {}
+    Vector() = default;
+    Vector(const std::array<Type, Size>& array);
+    Vector(std::initializer_list<Type> initializerList);
 
-    std::array<Type, Size>& getDataReference();
-    const std::array<Type, Size>& getData() const;
-    void setData(const std::array<Type, Size>& value);
-    Type& operator[](std::size_t index);
-    Vector<Type, Size> operator+(const Vector<Type, Size>& other) const;
-    Vector<Type, Size> operator-(const Vector<Type, Size>& other) const;
-
-    Vector<Type, Size> operator*(Type value) const;
-    Vector<Type, Size> operator/(Type value) const;
-
-    Vector<Type, Size>& operator+=(const Vector<Type, Size>& other);
-    Vector<Type, Size>& operator-=(const Vector<Type, Size>& other);
+    auto getData() const -> const std::array<Type, Size>&;
+    auto getDataReference() -> std::array<Type, Size>&;
+    auto setData(const std::array<Type, Size>& value) -> void;
+    auto operator[](std::size_t index) -> Type&;
+    auto operator[](std::size_t index) const -> const Type&;
+    auto operator+(const Vector<Size, Type>& other) const -> Vector<Size, Type>;
+    auto operator-(const Vector<Size, Type>& other) const -> Vector<Size, Type>;
+    auto operator*(Type value) const -> Vector<Size, Type>;
+    auto operator/(Type value) const -> Vector<Size, Type>;
+    auto operator+=(const Vector<Size, Type>& other) -> Vector<Size, Type>&;
+    auto operator-=(const Vector<Size, Type>& other) -> Vector<Size, Type>&;
 
 protected:
     std::array<Type, Size> data;
 };
 
-template <typename Type, std::size_t Size>
-std::array<Type, Size>& Vector<Type, Size>::getDataReference()
+template <std::size_t Size, typename Type>
+Vector<Size, Type>::Vector(
+    const std::array<Type, Size>& array)
+    : data(array)
+{
+}
+template <std::size_t Size, typename Type>
+Vector<Size, Type>::Vector(std::initializer_list<Type> initializerList)
+{
+    std::size_t i = 0;
+    for (const auto& item : initializerList) {
+        if (i >= Size) {
+            break;
+        }
+        data[i] = item;
+        ++i;
+    }
+}
+
+template <std::size_t Size, typename Type>
+std::array<Type, Size>& Vector<Size, Type>::getDataReference()
 {
     return data;
 }
 
-template <typename Type, std::size_t Size>
-const std::array<Type, Size>& Vector<Type, Size>::getData() const
+template <std::size_t Size, typename Type>
+const std::array<Type, Size>& Vector<Size, Type>::getData() const
 {
     return data;
 }
 
-template <typename Type, std::size_t Size>
-void Vector<Type, Size>::setData(const std::array<Type, Size>& value)
+template <std::size_t Size, typename Type>
+void Vector<Size, Type>::setData(const std::array<Type, Size>& value)
 {
     data = value;
 }
 
-template <typename Type, std::size_t Size>
-Type& Vector<Type, Size>::operator[](std::size_t index)
+template <std::size_t Size, typename Type>
+Type& Vector<Size, Type>::operator[](std::size_t index)
 {
     return data[index];
 }
 
-template <typename Type, std::size_t Size>
-Vector<Type, Size> Vector<Type, Size>::operator+(const Vector<Type, Size>& other) const
+template <std::size_t Size, typename Type>
+const Type& Vector<Size, Type>::operator[](std::size_t index) const
 {
-    Vector<Type, Size> result = *this;
+    return data[index];
+}
+
+template <std::size_t Size, typename Type>
+Vector<Size, Type> Vector<Size, Type>::operator+(const Vector<Size, Type>& other) const
+{
+    Vector<Size, Type> result = *this;
     for (size_t i = 0; i < Size; ++i) {
         result.data[i] += other.data[i];
     }
@@ -62,10 +89,10 @@ Vector<Type, Size> Vector<Type, Size>::operator+(const Vector<Type, Size>& other
     return result;
 }
 
-template <typename Type, std::size_t Size>
-Vector<Type, Size> Vector<Type, Size>::operator-(const Vector<Type, Size>& other) const
+template <std::size_t Size, typename Type>
+Vector<Size, Type> Vector<Size, Type>::operator-(const Vector<Size, Type>& other) const
 {
-    Vector<Type, Size> result = *this;
+    Vector<Size, Type> result = *this;
     for (size_t i = 0; i < Size; ++i) {
         result.data[i] -= other.data[i];
     }
@@ -73,28 +100,28 @@ Vector<Type, Size> Vector<Type, Size>::operator-(const Vector<Type, Size>& other
     return result;
 }
 
-template <typename Type, std::size_t Size>
-Vector<Type, Size> Vector<Type, Size>::operator*(Type value) const
+template <std::size_t Size, typename Type>
+Vector<Size, Type> Vector<Size, Type>::operator*(Type value) const
 {
-    Vector<Type, Size> result = *this;
+    Vector<Size, Type> result = *this;
     for (Type& item : result.data) {
         item *= value;
     }
     return result;
 }
 
-template <typename Type, std::size_t Size>
-Vector<Type, Size> Vector<Type, Size>::operator/(Type value) const
+template <std::size_t Size, typename Type>
+Vector<Size, Type> Vector<Size, Type>::operator/(Type value) const
 {
-    Vector<Type, Size> result = *this;
+    Vector<Size, Type> result = *this;
     for (Type& item : result.data) {
         item /= value;
     }
     return result;
 }
 
-template <typename Type, std::size_t Size>
-Vector<Type, Size>& Vector<Type, Size>::operator+=(const Vector<Type, Size>& other)
+template <std::size_t Size, typename Type>
+Vector<Size, Type>& Vector<Size, Type>::operator+=(const Vector<Size, Type>& other)
 {
     for (size_t i = 0; i < Size; ++i) {
         data[i] += other.data[i];
@@ -102,8 +129,8 @@ Vector<Type, Size>& Vector<Type, Size>::operator+=(const Vector<Type, Size>& oth
     return *this;
 }
 
-template <typename Type, std::size_t Size>
-Vector<Type, Size>& Vector<Type, Size>::operator-=(const Vector<Type, Size>& other)
+template <std::size_t Size, typename Type>
+Vector<Size, Type>& Vector<Size, Type>::operator-=(const Vector<Size, Type>& other)
 {
     for (size_t i = 0; i < Size; ++i) {
         data[i] -= other.data[i];
@@ -111,8 +138,8 @@ Vector<Type, Size>& Vector<Type, Size>::operator-=(const Vector<Type, Size>& oth
     return *this;
 }
 
-template <typename Type, std::size_t Size>
-std::ostream& operator<<(std::ostream& stream, const Vector<Type, Size>& vector)
+template <std::size_t Size, typename Type>
+std::ostream& operator<<(std::ostream& stream, const Vector<Size, Type>& vector)
 {
     stream << "[";
 
@@ -126,7 +153,7 @@ std::ostream& operator<<(std::ostream& stream, const Vector<Type, Size>& vector)
 }
 
 template <typename Type>
-class Vector2 : public Vector<Type, 2> {
+class Vector2 : public Vector<2, Type> {
 public:
     Vector2(Type x = 0, Type y = 0)
     {
@@ -143,5 +170,4 @@ public:
 
 using Vector2D = Vector2<double>;
 using Vector2F = Vector2<float>;
-
 }

@@ -2,7 +2,6 @@
 
 #include "Module.h"
 #include "SDL_keycode.h"
-#include "SceneRenderer.h"
 
 #include <functional>
 #include <memory>
@@ -18,8 +17,6 @@ public:
     virtual ~SDLWindow() override;
     virtual void onModuleCreation() override;
     virtual void processFrame(int32_t deltaTime) override;
-
-    std::shared_ptr<Scene> getScene() const;
 
     SDL_Renderer* getSdlRenderer() const;
 
