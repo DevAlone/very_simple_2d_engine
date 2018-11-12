@@ -19,6 +19,8 @@ public:
 
     void requestExit();
 
+    size_t getTimeMicroseconds() const;
+
 private:
     Core();
     Core(const Core& other) = delete;

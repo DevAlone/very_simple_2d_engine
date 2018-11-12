@@ -3,6 +3,8 @@
 
 #include <chrono>
 
+using CurrentClock = std::chrono::high_resolution_clock;
+
 Core::Core()
 {
 }
@@ -25,11 +27,10 @@ Core::~Core()
 
 void Core::loop()
 {
-    using clock = std::chrono::high_resolution_clock;
-    auto previousTime = clock::now();
+    auto previousTime = CurrentClock::now();
 
     while (!exitRequested) {
-        auto currentTime = clock::now();
+        auto currentTime = CurrentClock::now();
         int64_t deltaTime = std::chrono::duration_cast<std::chrono::microseconds>(currentTime - previousTime).count();
 
         for (const auto& module : modules) {
@@ -43,4 +44,13 @@ void Core::loop()
 void Core::requestExit()
 {
     exitRequested = true;
+}
+
+size_t Core::getTimeMicroseconds() const
+{
+    return static_cast<size_t>(
+        std::chrono::time_point_cast<std::chrono::microseconds>(
+            CurrentClock::now())
+            .time_since_epoch()
+            .count());
 }

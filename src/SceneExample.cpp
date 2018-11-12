@@ -1,7 +1,9 @@
 #include "SceneExample.h"
+#include "Core.h"
 
 #include "Exception.h"
 #include "InputProcessor.h"
+#include "MovableGameObject.hpp"
 #include "PhysicsGameObject.hpp"
 #include "SDLWindow.h"
 #include "SDL_keycode.h"
@@ -21,14 +23,14 @@ SceneExample::SceneExample(
     rootObject = std::make_shared<GameObject<2, float>>();
 
     mario = std::make_shared<PhysicsGameObject2F>(
-        Vector2F { 50, 50 }, Vector2F { 50, 50 }, 1);
+        Vector2F { 50, 50 }, Vector2F { cellSize, cellSize }, 1);
 
     mario->setTextureFromFile(
         "/home/user/projects/sdl_example/mario.bmp",
         window->getSdlRenderer());
 
     auto marioChild = std::make_shared<PhysicsGameObject2F>(
-        Vector2F { 100, 50 }, Vector2F { 50, 50 }, 1);
+        Vector2F { 100, 50 }, Vector2F { cellSize, cellSize }, 1);
 
     marioChild->setTextureFromFile(
         "/home/user/projects/sdl_example/mario.jpg",
@@ -47,7 +49,7 @@ SceneExample::SceneExample(
             mario->addForce({ 0, moveCoefficient });
         },
         [this]() {
-            // mario->addForce({ 0, -moveCoefficient });
+            mario->addForce({ 0, -moveCoefficient });
         });
 
     inputProcessor->subscribeOnKey(
@@ -56,7 +58,7 @@ SceneExample::SceneExample(
             mario->addForce({ 0, -moveCoefficient });
         },
         [this]() {
-            // mario->addForce({ 0, moveCoefficient });
+            mario->addForce({ 0, moveCoefficient });
         });
 
     inputProcessor->subscribeOnKey(
@@ -65,7 +67,7 @@ SceneExample::SceneExample(
             mario->addForce({ moveCoefficient, 0 });
         },
         [this]() {
-            // mario->addForce({ -moveCoefficient, 0 });
+            mario->addForce({ -moveCoefficient, 0 });
         });
 
     inputProcessor->subscribeOnKey(
@@ -74,6 +76,35 @@ SceneExample::SceneExample(
             mario->addForce({ -moveCoefficient, 0 });
         },
         [this]() {
-            // mario->addForce({ moveCoefficient, 0 });
+            mario->addForce({ moveCoefficient, 0 });
         });
+}
+
+void SceneExample::processFrame(int32_t)
+{
+    size_t currentTime = Core::getCore()->getTimeMicroseconds();
+
+    if (lastObjectCreationgTime + objectCreatingPeriod < currentTime) {
+        for (const std::shared_ptr<MovableGameObject2F>& gameObject : objects) {
+            auto& position = gameObject->getPositionRef();
+
+            if (position[1] > 0) {
+                position[1] -= cellSize;
+            }
+            if (position[1] < 0) {
+                position[1] = 0;
+            }
+        }
+
+        float randomX = rand() % (int(getSize()[0]) / int(cellSize) + 1) * cellSize;
+        auto object = std::make_shared<MovableGameObject2F>(
+            Vector2F { randomX, getSize()[1] }, Vector2F { cellSize, cellSize });
+
+        object->setColor(255, 0, 0);
+        rootObject->addChild(object);
+
+        objects.push_back(object);
+
+        lastObjectCreationgTime = currentTime;
+    }
 }

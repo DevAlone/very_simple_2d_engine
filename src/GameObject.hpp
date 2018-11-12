@@ -32,6 +32,9 @@ public:
     auto getTexture() const -> SDL_Texture*;
     auto getParent() const -> GameObject*;
 
+    game_math::Vector<3, unsigned char> getColor() const;
+    void setColor(unsigned char red, unsigned char green, unsigned char blue);
+
 private:
     /**
      * @brief objectsTreeContainItem - looks for object in tree
@@ -46,6 +49,8 @@ private:
     GameObject* parent = nullptr;
     std::unordered_set<std::shared_ptr<GameObject>> children;
     SDL_Texture* texture = nullptr;
+    game_math::Vector<3, unsigned char> color
+        = game_math::Vector<3, unsigned char> { 0, 0, 0 };
 };
 
 using GameObject2F = GameObject<2, float>;
@@ -140,4 +145,16 @@ bool GameObject<Size, Type>::objectsTreeContainsItem(
     }
 
     return false;
+}
+
+template <std::size_t Size, typename Type>
+game_math::Vector<3, unsigned char> GameObject<Size, Type>::getColor() const
+{
+    return color;
+}
+
+template <std::size_t Size, typename Type>
+void GameObject<Size, Type>::setColor(unsigned char red, unsigned char green, unsigned char blue)
+{
+    color = game_math::Vector<3, unsigned char> { red, green, blue };
 }

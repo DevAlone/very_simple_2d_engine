@@ -8,16 +8,25 @@ class InputProcessor;
 #include "PhysicsGameObject.hpp"
 #include "Scene.hpp"
 
+#include <vector>
+
 class SceneExample : public Scene<2, float> {
 public:
     SceneExample(
         const std::shared_ptr<SDLWindow>& window,
         const std::shared_ptr<InputProcessor>& inputProcessor);
 
+    virtual void processFrame(int32_t deltaTime) override;
+
 private:
     std::shared_ptr<GameObject2F> rootObject;
     std::shared_ptr<PhysicsGameObject2F> mario;
-    const float moveCoefficient = 10;
+    const float moveCoefficient = 10000;
+    const float cellSize = 50;
+    // in microseconds
+    const size_t objectCreatingPeriod = 1000 * 1000 * 1;
+    size_t lastObjectCreationgTime = 0;
+    std::vector<std::shared_ptr<MovableGameObject2F>> objects;
 };
 
 #endif // SCENEEXAMPLE_H

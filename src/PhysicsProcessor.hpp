@@ -13,7 +13,7 @@
 #include <vector>
 
 /**
- * @brief processes physics for object inside the scene
+ * @brief processes physics for objects inside the scene
  * with SIZE dimensions and Type as base type
  */
 template <std::size_t SIZE, typename Type>
@@ -75,7 +75,7 @@ void PhysicsProcessor<SIZE, Type>::processPhysicsForObject(
 
         // apply objects accelerations
 
-        physicsObject->getSpeedRef() += physicsObject->getAcceleration() * k;
+        // physicsObject->getSpeedRef() += physicsObject->getAcceleration() * k;
 
         physicsObject->getPositionRef() += physicsObject->getSpeed() * k;
 
@@ -96,6 +96,8 @@ void PhysicsProcessor<SIZE, Type>::processPhysicsForObject(
             if (hit) {
                 // physicsObject->getSpeedRef()[i] = Type();
                 physicsObject->getSpeedRef() = game_math::Vector<SIZE, Type>(Type());
+
+                physicsObject->getSpeedRef() += physicsObject->getAcceleration() * k;
             }
         }
     }

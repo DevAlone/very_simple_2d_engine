@@ -86,14 +86,17 @@ void Scene2Renderer<Type>::renderObject(const std::shared_ptr<GameObject<2, Type
                 nullptr,
                 &rect);
 
-            /*SDL_SetRenderDrawColor(
-            renderer,
-            255,
-            255,
-            255,
-            SDL_ALPHA_OPAQUE);*/
         } else {
-            // TODO: render rectangle
+            SDL_SetRenderDrawColor(
+                renderer,
+                movableObject->getColor()[0],
+                movableObject->getColor()[1],
+                movableObject->getColor()[2],
+                SDL_ALPHA_OPAQUE);
+
+            SDL_RenderFillRect(
+                renderer,
+                &rect);
         }
     }
 
