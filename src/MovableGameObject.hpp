@@ -63,3 +63,16 @@ void MovableGameObject<Size, Type>::setSize(const game_math::Vector<Size, Type>&
 {
     size = value;
 }
+
+template <std::size_t nDimensions, typename BaseType>
+std::ostream& operator<<(
+    std::ostream& stream,
+    const std::shared_ptr<MovableGameObject<nDimensions, BaseType>>& obj)
+{
+    return stream
+        << "GameObjectPtr { name: \""
+        << obj->getName()
+        << "\", address: \""
+        << obj.get()
+        << "\" }";
+}

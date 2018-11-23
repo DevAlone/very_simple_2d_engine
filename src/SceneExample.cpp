@@ -1,6 +1,7 @@
 #include "SceneExample.h"
 #include "Core.h"
 
+#include "CollisionsProcessor.hpp"
 #include "Exception.h"
 #include "InputProcessor.h"
 #include "MovableGameObject.hpp"
@@ -25,12 +26,16 @@ SceneExample::SceneExample(
     mario = std::make_shared<PhysicsGameObject2F>(
         Vector2F { 50, 50 }, Vector2F { cellSize, cellSize }, 1);
 
+    mario->setName("mario");
+
     mario->setTextureFromFile(
         "/home/user/projects/sdl_example/mario.bmp",
         window->getSdlRenderer());
 
-    auto marioChild = std::make_shared<PhysicsGameObject2F>(
+    marioChild = std::make_shared<PhysicsGameObject2F>(
         Vector2F { 100, 50 }, Vector2F { cellSize, cellSize }, 1);
+
+    marioChild->setName("mario child");
 
     marioChild->setTextureFromFile(
         "/home/user/projects/sdl_example/mario.jpg",
@@ -82,6 +87,8 @@ SceneExample::SceneExample(
 
 void SceneExample::processFrame(int32_t)
 {
+    static int i = 0;
+
     size_t currentTime = Core::getCore()->getTimeMicroseconds();
 
     if (lastObjectCreationgTime + objectCreatingPeriod < currentTime) {
@@ -96,15 +103,69 @@ void SceneExample::processFrame(int32_t)
             }
         }
 
-        float randomX = rand() % (int(getSize()[0]) / int(cellSize) + 1) * cellSize;
-        auto object = std::make_shared<MovableGameObject2F>(
-            Vector2F { randomX, getSize()[1] }, Vector2F { cellSize, cellSize });
+        if (i == 2)
+            return;
+        else {
+            ++i;
 
-        object->setColor(255, 0, 0);
-        rootObject->addChild(object);
+            float randomX = rand() % (int(getSize()[0]) / int(cellSize) + 1) * cellSize;
+            auto object = std::make_shared<MovableGameObject2F>(
+                Vector2F { randomX, getSize()[1] }, Vector2F { cellSize, cellSize });
 
-        objects.push_back(object);
+            object->setColor(255, 0, 0);
+            rootObject->addChild(object);
+
+            objects.push_back(object);
+        }
 
         lastObjectCreationgTime = currentTime;
     }
+}
+
+void SceneExample::setCollisionsProcessor(
+    const std::shared_ptr<CollisionsProcessor<2, float>>& collisionsProcessor)
+{
+    collisionsProcessor->subscribeOnCollision(
+        mario,
+        [](const auto& obj) {
+            std::cout
+                << "Mario started colliding with "
+                << obj
+                << std::endl;
+        },
+        [](const auto& obj) {
+            std::cout
+                << "Mario finished colliding with "
+                << obj
+                << std::endl;
+        });
+
+    collisionsProcessor->subscribeOnCollision(
+        marioChild,
+        [](const auto& obj) {
+            std::cout
+                << "MarioChild started colliding with "
+                << obj
+                << std::endl;
+        },
+        [](const auto& obj) {
+            std::cout
+                << "MarioChild finished colliding with "
+                << obj
+                << std::endl;
+        });
+
+    collisionsProcessor->subscribeOnCollision(
+        mario,
+        marioChild,
+        [] {
+            std::cout
+                << "Mario and MarioChild started colliding with each other"
+                << std::endl;
+        },
+        [] {
+            std::cout
+                << "Mario and MarioChild started colliding with each other"
+                << std::endl;
+        });
 }

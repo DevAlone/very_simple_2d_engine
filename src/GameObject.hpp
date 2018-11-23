@@ -10,6 +10,7 @@ class SDLWindow;
 #include "game_math/Vector.hpp"
 
 #include <cstddef>
+#include <iostream>
 #include <memory>
 #include <unordered_set>
 #include <vector>
@@ -20,6 +21,7 @@ class SDLWindow;
  */
 template <std::size_t Size, typename Type>
 class GameObject {
+    using String = std::string;
 
 public:
     virtual ~GameObject();
@@ -35,6 +37,15 @@ public:
     game_math::Vector<3, unsigned char> getColor() const;
     void setColor(unsigned char red, unsigned char green, unsigned char blue);
 
+    auto getName() const -> String
+    {
+        return name;
+    }
+    void setName(const String& value)
+    {
+        name = value;
+    }
+
 private:
     /**
      * @brief objectsTreeContainItem - looks for object in tree
@@ -46,6 +57,7 @@ private:
         const std::shared_ptr<GameObject>& root,
         const std::shared_ptr<GameObject>& object) -> bool;
 
+    String name;
     GameObject* parent = nullptr;
     std::unordered_set<std::shared_ptr<GameObject>> children;
     SDL_Texture* texture = nullptr;
@@ -157,4 +169,17 @@ template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::setColor(unsigned char red, unsigned char green, unsigned char blue)
 {
     color = game_math::Vector<3, unsigned char> { red, green, blue };
+}
+
+template <std::size_t nDimensions, typename BaseType>
+std::ostream& operator<<(
+    std::ostream& stream,
+    const std::shared_ptr<GameObject<nDimensions, BaseType>>& obj)
+{
+    return stream
+        << "GameObjectPtr { name: \""
+        << obj->getName()
+        << "\", address: \""
+        << obj.get()
+        << "\" }";
 }
