@@ -165,7 +165,7 @@ void SceneExample::setCollisionsProcessor(
         },
         [] {
             std::cout
-                << "Mario and MarioChild started colliding with each other"
+                << "Mario and MarioChild finished colliding with each other"
                 << std::endl;
         });
 }

@@ -148,6 +148,7 @@ void CollisionsProcessor<nDimensions, Type>::processFrame(int32_t)
             // someone went out from collision
             for (const auto& object2 : objectsSet) {
                 processCollision(object1, object2, false);
+                collisionsMap.erase(object2);
             }
         }
     }
@@ -184,16 +185,10 @@ void CollisionsProcessor<nDimensions, Type>::processCollision(
     const MovableObjectPtrType& object2,
     bool isStarted)
 {
-    // TODO: fix bug
-    auto onObjectCollisionSubscriptions = isStarted ? onObjectCollisionStartedSubscriptions
-                                                    : onObjectCollisionFinishedSubscriptions;
-    auto onObjectsCollisionSubscriptions = isStarted ? onObjectsCollisionStartedSubscriptions
-                                                     : onObjectsCollisionFinishedSubscriptions;
+    auto& onObjectCollisionSubscriptions = isStarted ? onObjectCollisionStartedSubscriptions
+                                                     : onObjectCollisionFinishedSubscriptions;
 
-    std::unordered_set<MovableObjectPtrType>& object1CollisionsSet
-        = collisionsMap[object1];
-
-    if (object1CollisionsSet.find(object2) == object1CollisionsSet.end()) {
+    {
         auto it = onObjectCollisionSubscriptions.find(object1);
         if (it != onObjectCollisionSubscriptions.end()) {
             for (const auto& function : it->second) {
@@ -201,9 +196,7 @@ void CollisionsProcessor<nDimensions, Type>::processCollision(
             }
         }
     }
-    std::unordered_set<MovableObjectPtrType>& object2CollisionsSet
-        = collisionsMap[object2];
-    if (object2CollisionsSet.find(object1) == object2CollisionsSet.end()) {
+    {
         auto it = onObjectCollisionSubscriptions.find(object2);
         if (it != onObjectCollisionSubscriptions.end()) {
             for (const auto& function : it->second) {
@@ -212,9 +205,14 @@ void CollisionsProcessor<nDimensions, Type>::processCollision(
         }
     }
 
+    auto& onObjectsCollisionSubscriptions = isStarted ? onObjectsCollisionStartedSubscriptions
+                                                      : onObjectsCollisionFinishedSubscriptions;
+
     {
-        auto it = onObjectsCollisionSubscriptions.find(std::make_pair(
-            object1, object2));
+        auto it = onObjectsCollisionSubscriptions.find(std::make_pair(object1, object2));
+        if (it == onObjectsCollisionSubscriptions.end()) {
+            it = onObjectsCollisionSubscriptions.find(std::make_pair(object2, object1));
+        }
         if (it != onObjectsCollisionSubscriptions.end()) {
             for (const auto& function : it->second) {
                 function();
