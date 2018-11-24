@@ -1,5 +1,4 @@
-#ifndef SCENEEXAMPLE_H
-#define SCENEEXAMPLE_H
+#pragma once
 
 class SDLWindow;
 class InputProcessor;
@@ -33,5 +32,3 @@ private:
     size_t lastObjectCreationgTime = 0;
     std::vector<std::shared_ptr<MovableGameObject2F>> objects;
 };
-
-#endif // SCENEEXAMPLE_H

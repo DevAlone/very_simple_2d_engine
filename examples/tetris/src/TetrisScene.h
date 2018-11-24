@@ -1,11 +1,9 @@
-#ifndef TETRISSCENE_H
-#define TETRISSCENE_H
+#pragma once
 
+#include "Scene.hpp"
+#include "globals.h"
 
-class TetrisScene
-{
+class TetrisScene : public Scene<nDimensions, BaseType> {
 public:
-    TetrisScene();
+    TetrisScene(unsigned width, unsigned height);
 };
-
-#endif // TETRISSCENE_H

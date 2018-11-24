@@ -20,7 +20,14 @@ void SDLWindow::onModuleCreation()
             + SDL_GetError());
     }
 
-    sdlWindow = SDL_CreateWindow("Title", 0, 0, 640, 480, SDL_WINDOW_SHOWN);
+    sdlWindow = SDL_CreateWindow(
+        "Title",
+        0,
+        0,
+        static_cast<int>(width),
+        static_cast<int>(height),
+        SDL_WINDOW_SHOWN);
+
     if (sdlWindow == nullptr) {
         throw Exception(
             std::string("Unable to create window. Error: ")

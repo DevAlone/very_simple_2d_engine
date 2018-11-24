@@ -14,12 +14,14 @@ class Matrix {
     using DataType = std::array<RowType, nRows>;
 
 public:
+    Matrix() = default;
     explicit Matrix(const BaseType& defaultValue);
     Matrix(const DataType& data);
     Matrix(const RowType (&array)[nRows]);
     // Matrix(std::initializer_list<Type> initializerList);
 
     auto operator[](std::size_t index) -> RowType;
+    auto operator[](std::size_t index) const -> const RowType&;
     auto operator==(const Matrix<nRows, nColumns, BaseType>& other) const -> bool;
     auto operator!=(const Matrix<nRows, nColumns, BaseType>& other) const -> bool;
 
@@ -55,6 +57,13 @@ Matrix<nRows, nColumns, BaseType>::Matrix(const Matrix::RowType (&array)[nRows])
 
 template <std::size_t nRows, std::size_t nColumns, typename BaseType>
 auto Matrix<nRows, nColumns, BaseType>::operator[](std::size_t index) -> Vector<nColumns, BaseType>
+{
+    return data[index];
+}
+
+template <std::size_t nRows, std::size_t nColumns, typename BaseType>
+auto Matrix<nRows, nColumns, BaseType>::operator[](std::size_t index) const
+    -> const Vector<nColumns, BaseType>&
 {
     return data[index];
 }

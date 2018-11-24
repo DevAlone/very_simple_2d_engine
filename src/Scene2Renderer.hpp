@@ -63,7 +63,7 @@ void Scene2Renderer<Type>::renderObject(const std::shared_ptr<GameObject<2, Type
     if (!object)
         return;
 
-    if (auto movableObject = std::dynamic_pointer_cast<MovableGameObject2F>(object)) {
+    if (auto movableObject = std::dynamic_pointer_cast<MovableGameObject<2, Type>>(object)) {
         SDL_Renderer* renderer = sdlWindow->getSdlRenderer();
         // TODO: render
         auto position = movableObject->getPosition();

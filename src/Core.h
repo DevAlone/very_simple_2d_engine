@@ -1,5 +1,4 @@
-#ifndef CORE_H
-#define CORE_H
+#pragma once
 
 #include "Module.h"
 
@@ -13,7 +12,7 @@ public:
     ~Core();
 
     template <typename T, typename... Args>
-    std::shared_ptr<Module> addModuleOfType(Args... args);
+    std::shared_ptr<T> addModuleOfType(Args... args);
 
     void loop();
 
@@ -31,14 +30,11 @@ private:
 };
 
 template <typename T, typename... Args>
-std::shared_ptr<Module> Core::addModuleOfType(Args... args)
+std::shared_ptr<T> Core::addModuleOfType(Args... args)
 {
     static_assert(std::is_base_of<Module, T>::value, "have to be subclass of Module");
 
     auto module = std::make_shared<T>(args...);
-    module->onModuleCreation();
     modules.push_back(module);
     return module;
 }
-
-#endif // CORE_H

@@ -1,4 +1,9 @@
-#ifndef GLOBALS_H
-#define GLOBALS_H
+#pragma once
 
-#endif // GLOBALS_H
+#include <cstddef>
+
+const std::size_t nDimensions = 2;
+using BaseType = unsigned;
+const BaseType blockSize = 25;
+const BaseType sceneWidth = blockSize * 10;
+const BaseType sceneHeight = blockSize * 20;

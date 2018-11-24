@@ -27,6 +27,10 @@ Core::~Core()
 
 void Core::loop()
 {
+    for (const auto& module : modules) {
+        module->onModuleCreation();
+    }
+
     auto previousTime = CurrentClock::now();
 
     while (!exitRequested) {

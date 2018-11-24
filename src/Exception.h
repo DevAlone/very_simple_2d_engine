@@ -1,6 +1,6 @@
-#ifndef EXCEPTION_H
-#define EXCEPTION_H
+#pragma once
 
+#include <iostream>
 #include <string>
 
 class Exception {
@@ -14,4 +14,9 @@ private:
     std::string message;
 };
 
-#endif // EXCEPTION_H
+inline std::ostream& operator<<(
+    std::ostream& stream,
+    const Exception& exc)
+{
+    return stream << "Exception { message: \"" << exc.getMessage() << "\" }";
+}

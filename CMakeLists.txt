@@ -20,12 +20,13 @@ file(GLOB_RECURSE PROJECT_TEST_SOURCES
     "tests/*.hpp"
     "tests/*.cpp"
 
-    "src/GameObject.cpp"
-    "src/Exception.cpp"
+    "src/*.h"
+    "src/*.hpp"
+    "src/*.cpp"
 )
 
 
-add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+# add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 add_executable(Test ${PROJECT_TEST_SOURCES})
 
 include_directories(
@@ -33,5 +34,5 @@ include_directories(
     ${SDL2IMAGE_INCLUDE_DIRS}
 )
 
-target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
+# target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
 target_link_libraries(Test ${SDL2_LIBRARIES} ${SDL2IMAGE_LIBRARIES})
