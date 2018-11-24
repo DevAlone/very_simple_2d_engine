@@ -13,9 +13,11 @@ namespace game_math {
 template <std::size_t Size, typename Type>
 class Vector {
 public:
+    Vector() = default;
     explicit Vector(const Type& defaultValue);
     Vector(const std::array<Type, Size>& array);
     Vector(std::initializer_list<Type> initializerList);
+    Vector(const Type (&array)[Size]);
 
     auto getData() const -> const std::array<Type, Size>&;
     auto getDataReference() -> std::array<Type, Size>&;
@@ -28,6 +30,8 @@ public:
     auto operator/(Type value) const -> Vector<Size, Type>;
     auto operator+=(const Vector<Size, Type>& other) -> Vector<Size, Type>&;
     auto operator-=(const Vector<Size, Type>& other) -> Vector<Size, Type>&;
+    auto operator==(const Vector<Size, Type>& other) const -> bool;
+    auto operator!=(const Vector<Size, Type>& other) const -> bool;
 
 protected:
     std::array<Type, Size> data;
@@ -57,6 +61,12 @@ Vector<Size, Type>::Vector(std::initializer_list<Type> initializerList)
         data[i] = item;
         ++i;
     }
+}
+
+template <std::size_t Size, typename Type>
+Vector<Size, Type>::Vector(const Type (&array)[Size])
+{
+    std::copy(std::begin(array), std::end(array), std::begin(data));
 }
 
 template <std::size_t Size, typename Type>
@@ -147,6 +157,18 @@ Vector<Size, Type>& Vector<Size, Type>::operator-=(const Vector<Size, Type>& oth
         data[i] -= other.data[i];
     }
     return *this;
+}
+
+template <std::size_t Size, typename Type>
+bool Vector<Size, Type>::operator==(const Vector<Size, Type>& other) const
+{
+    return data == other.data;
+}
+
+template <std::size_t Size, typename Type>
+bool Vector<Size, Type>::operator!=(const Vector<Size, Type>& other) const
+{
+    return data != other.data;
 }
 
 template <std::size_t Size, typename Type>

@@ -79,3 +79,84 @@ TEST_CASE("GameObjects reparenting", "[GameObject]")
     CHECK(obj1->getParent() == obj2.get());
     CHECK(obj2->getParent() == nullptr);
 }
+
+TEST_CASE("Matrices operations", "[Matrix]")
+{
+    Matrix<2, 2, int> m1({
+        { 1, 2 },
+        { 3, 4 },
+    });
+
+    CHECK(m1[0][0] == 1);
+    CHECK(m1[0][1] == 2);
+    CHECK(m1[1][0] == 3);
+    CHECK(m1[1][1] == 4);
+
+    m1.transpose();
+
+    CHECK(m1[0][0] == 1);
+    CHECK(m1[0][1] == 3);
+    CHECK(m1[1][0] == 2);
+    CHECK(m1[1][1] == 4);
+
+    CHECK(m1 == Matrix<2, 2, int>({
+                    { 1, 3 },
+                    { 2, 4 },
+                }));
+
+    m1.rotateClockwise();
+
+    CHECK(m1 == decltype(m1)({
+                    { 2, 1 },
+                    { 4, 3 },
+                }));
+
+    auto m2 = Matrix<4, 4, int>({
+        { 1, 2, 3, 4 },
+        { 5, 6, 7, 8 },
+        { 9, 10, 11, 12 },
+        { 13, 14, 15, 16 },
+    });
+
+    m2.rotateClockwise();
+
+    CHECK(m2 == decltype(m2)({
+                    { 13, 9, 5, 1 },
+                    { 14, 10, 6, 2 },
+                    { 15, 11, 7, 3 },
+                    { 16, 12, 8, 4 },
+                }));
+
+    m2.rotateClockwise();
+    m2.rotateClockwise();
+    m2.rotateClockwise();
+
+    CHECK(m2 == decltype(m2)({
+                    { 1, 2, 3, 4 },
+                    { 5, 6, 7, 8 },
+                    { 9, 10, 11, 12 },
+                    { 13, 14, 15, 16 },
+                }));
+
+    auto m3 = Matrix<3, 3, int>({
+        { 1, 2, 3 },
+        { 4, 5, 6 },
+        { 7, 8, 9 },
+    });
+    m3.rotateCounterclockwise();
+    m3.rotateCounterclockwise();
+
+    CHECK(m3 == decltype(m3)({
+                    { 9, 8, 7 },
+                    { 6, 5, 4 },
+                    { 3, 2, 1 },
+                }));
+    m3.rotateCounterclockwise();
+    m3.rotateCounterclockwise();
+
+    CHECK(m3 == decltype(m3)({
+                    { 1, 2, 3 },
+                    { 4, 5, 6 },
+                    { 7, 8, 9 },
+                }));
+}
