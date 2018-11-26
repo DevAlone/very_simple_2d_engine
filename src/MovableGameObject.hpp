@@ -13,7 +13,7 @@ public:
         const game_math::Vector<Size, Type>& size = { 0, 0 });
 
     auto getPosition() const -> const game_math::Vector<Size, Type>&;
-    auto getPositionRef() -> game_math::Vector<Size, Type>&;
+    // auto getPositionRef() -> game_math::Vector<Size, Type>&;
     auto setPosition(const game_math::Vector<Size, Type>& value) -> void;
     auto getSize() const -> const game_math::Vector<Size, Type>&;
     auto setSize(const game_math::Vector<Size, Type>& value) -> void;
@@ -34,11 +34,11 @@ MovableGameObject<Size, Type>::MovableGameObject(
 {
 }
 
-template <std::size_t Size, typename Type>
+/*template <std::size_t Size, typename Type>
 auto MovableGameObject<Size, Type>::getPositionRef() -> game_math::Vector<Size, Type>&
 {
     return position;
-}
+}*/
 
 template <std::size_t Size, typename Type>
 const game_math::Vector<Size, Type>& MovableGameObject<Size, Type>::getPosition() const
@@ -49,7 +49,11 @@ const game_math::Vector<Size, Type>& MovableGameObject<Size, Type>::getPosition(
 template <std::size_t Size, typename Type>
 void MovableGameObject<Size, Type>::setPosition(const game_math::Vector<Size, Type>& value)
 {
+    auto oldPosition = position;
     position = value;
+    if (this->scene) {
+        this->scene->notifyOnObjectPositionChanged(this, oldPosition);
+    }
 }
 
 template <std::size_t Size, typename Type>

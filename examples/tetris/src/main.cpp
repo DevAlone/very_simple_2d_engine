@@ -2,6 +2,7 @@
 #include "Exception.h"
 #include "GameLogic.h"
 #include "Scene2Renderer.hpp"
+#include "SceneMap.hpp"
 #include "TetrisScene.h"
 #include "TimersProcessor.h"
 #include "globals.h"
@@ -14,7 +15,8 @@ void createGame()
 
     auto scene = core->addModuleOfType<TetrisScene>(sceneWidth, sceneHeight);
     auto timersProcessor = core->addModuleOfType<TimersProcessor>();
-    auto gameLogic = core->addModuleOfType<GameLogic>(scene, timersProcessor);
+    auto sceneMap = core->addModuleOfType<SceneMap<nDimensions, BaseType, 3>>(scene);
+    auto gameLogic = core->addModuleOfType<GameLogic>(scene, sceneMap, timersProcessor);
     auto sdlWindow = core->addModuleOfType<SDLWindow>(sceneWidth, sceneHeight);
     auto sceneRenderer = core->addModuleOfType<Scene2Renderer<BaseType>>(scene, sdlWindow);
 

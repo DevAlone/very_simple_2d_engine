@@ -8,6 +8,7 @@ using namespace game_math;
 
 GameLogic::GameLogic(
     const std::shared_ptr<TetrisScene>& scene,
+    const std::shared_ptr<SceneMap<nDimensions, BaseType, 3>>& sceneMap,
     const std::shared_ptr<TimersProcessor>& timersProcessor)
     : scene(scene)
     , timersProcessor(timersProcessor)
@@ -19,6 +20,9 @@ GameLogic::GameLogic(
     auto root = std::make_shared<MovableGameObject<nDimensions, BaseType>>(
         game_math::Vector<nDimensions, BaseType>({ 0, 0 }),
         scene->getSize());
+
+    // TODO: refactor
+    Scene<nDimensions, BaseType>::setRootObject(scene, root);
 
     auto shape = Matrix<4, 4, bool>(
         { { 1, 0, 0, 0 },
@@ -38,19 +42,21 @@ GameLogic::GameLogic(
     tetrominos.insert(tetromino);
     root->addChild(tetromino);
 
-    scene->setRootObject(root);
+    //scene->setRootObject(root);
 
     timersProcessor->createTimer(1000 * 1000 * 1)->addHandler([this] {
         for (auto tetromino : tetrominos) {
             for (auto child : tetromino->getChildren()) {
                 if (auto movableChild
                     = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {
-                    auto& positionRef = movableChild->getPositionRef();
+                    auto position = movableChild->getPosition();
 
-                    positionRef[1] -= blockSize;
-                    if (positionRef[1] < 0) {
-                        positionRef[1] = 0;
+                    position[1] -= blockSize;
+                    if (position[1] < 0) {
+                        position[1] = 0;
                     }
+
+                    movableChild->setPosition(position);
                 }
             }
         }

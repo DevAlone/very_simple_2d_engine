@@ -4,12 +4,16 @@ class SDL_Texture;
 class SDL_Renderer;
 class SDLWindow;
 
+#include <cstddef>
+
+template <std::size_t Size, typename Type>
+class Scene;
+
 #include "Exception.h"
 #include "SDL2/SDL.h"
 #include "SDL_image.h"
 #include "game_math/Vector.hpp"
 
-#include <cstddef>
 #include <iostream>
 #include <memory>
 #include <unordered_set>
@@ -21,6 +25,9 @@ class SDLWindow;
  */
 template <std::size_t Size, typename Type>
 class GameObject {
+    template <std::size_t S, typename T>
+    friend class Scene;
+
     using String = std::string;
 
 public:
@@ -48,6 +55,9 @@ public:
     {
         name = value;
     }
+
+protected:
+    std::shared_ptr<Scene<Size, Type>> scene;
 
 private:
     /**
@@ -84,6 +94,8 @@ GameObject<Size, Type>::~GameObject()
 template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::addChild(const std::shared_ptr<GameObject>& child)
 {
+    child->scene = scene;
+
     children.insert(child);
 
     if (auto p = child->getParent()) {

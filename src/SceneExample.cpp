@@ -44,7 +44,7 @@ SceneExample::SceneExample(
     mario->addChild(marioChild);
 
     rootObject->addChild(mario);
-    setRootObject(rootObject);
+    // setRootObject(rootObject);
 
     // mario->setSpeed({ 0, -9.8f });
 
@@ -93,14 +93,14 @@ void SceneExample::processFrame(int32_t)
 
     if (lastObjectCreationgTime + objectCreatingPeriod < currentTime) {
         for (const std::shared_ptr<MovableGameObject2F>& gameObject : objects) {
-            auto& position = gameObject->getPositionRef();
+            /*auto& position = gameObject->getPositionRef();
 
             if (position[1] > 0) {
                 position[1] -= cellSize;
             }
             if (position[1] < 0) {
                 position[1] = 0;
-            }
+            }*/
         }
 
         if (i == 2)
