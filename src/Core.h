@@ -18,7 +18,7 @@ public:
 
     void requestExit();
 
-    size_t getTimeMicroseconds() const;
+    static size_t getTimeMicroseconds();
 
 private:
     Core();

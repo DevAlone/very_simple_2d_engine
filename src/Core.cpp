@@ -50,7 +50,7 @@ void Core::requestExit()
     exitRequested = true;
 }
 
-size_t Core::getTimeMicroseconds() const
+size_t Core::getTimeMicroseconds()
 {
     return static_cast<size_t>(
         std::chrono::time_point_cast<std::chrono::microseconds>(

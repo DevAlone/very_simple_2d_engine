@@ -28,8 +28,7 @@ public:
 
     auto addChild(const std::shared_ptr<GameObject>& child) -> void;
     auto removeChild(const std::shared_ptr<GameObject>& child) -> void;
-    auto getChildren() const -> const std::unordered_set<std::shared_ptr<GameObject>>&;
-    auto setPosition(const game_math::Vector2F& value) -> void;
+    auto getChildren() -> std::unordered_set<std::shared_ptr<GameObject>>&;
     auto setTextureFromFile(const std::string& filename, SDL_Renderer* renderer) -> void;
     auto getTexture() const -> SDL_Texture*;
     auto getParent() const -> GameObject*;
@@ -112,7 +111,8 @@ void GameObject<Size, Type>::removeChild(const std::shared_ptr<GameObject>& chil
 }
 
 template <std::size_t Size, typename Type>
-const std::unordered_set<std::shared_ptr<GameObject<Size, Type>>>& GameObject<Size, Type>::getChildren() const
+auto GameObject<Size, Type>::getChildren()
+    -> std::unordered_set<std::shared_ptr<GameObject<Size, Type>>>&
 {
     return children;
 }
