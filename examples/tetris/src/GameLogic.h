@@ -27,4 +27,5 @@ private:
     std::shared_ptr<Scene2Map<BaseType, sceneRows, sceneColumns>> sceneMap;
     std::shared_ptr<TimersProcessor> timersProcessor;
     std::unordered_set<std::shared_ptr<Tetromino>> tetrominos;
+    std::shared_ptr<Tetromino> currentTetromino;
 };

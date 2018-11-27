@@ -86,13 +86,13 @@ void Scene2Renderer<Type>::renderObject(const std::shared_ptr<GameObject<2, Type
                 nullptr,
                 &rect);
 
-        } else {
+        } else if (movableObject->getColor()[3] != 0) {
             SDL_SetRenderDrawColor(
                 renderer,
                 movableObject->getColor()[0],
                 movableObject->getColor()[1],
                 movableObject->getColor()[2],
-                SDL_ALPHA_OPAQUE);
+                movableObject->getColor()[3]);
 
             SDL_RenderFillRect(
                 renderer,

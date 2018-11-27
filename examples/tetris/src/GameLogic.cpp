@@ -25,7 +25,7 @@ GameLogic::GameLogic(
     // TODO: refactor
     Scene<nDimensions, BaseType>::setRootObject(scene, root);
 
-    auto shape = Matrix<4, 4, bool>(
+    /*auto shape = Matrix<4, 4, bool>(
         { { 1, 0, 0, 0 },
             { 1, 0, 1, 0 },
             { 1, 0, 0, 0 },
@@ -41,29 +41,21 @@ GameLogic::GameLogic(
         shape));
 
     tetrominos.insert(tetromino);
-    root->addChild(tetromino);
+    root->addChild(tetromino);*/
 
     //scene->setRootObject(root);
 
-    timersProcessor->createTimer(1000 * 1000 * 1)->addHandler([this] {
+    timersProcessor->createTimer(1000 * 1000 * 0.5f)->addHandler([this] {
         this->handleTimer();
     });
 
-    timersProcessor->createTimer(1000 * 1000 * 5)->addHandler([this] {
-        auto shape = Matrix<4, 4, bool>(
-            { { 1, 0, 0, 0 },
-                { 1, 0, 0, 0 },
-                { 1, 0, 0, 0 },
-                { 1, 0, 0, 0 } });
-
-        BaseType x = 0;
+    timersProcessor->createTimer(1000 * 1000 * 2.5f)->addHandler([this] {
+        // TODO: fix random
+        BaseType x = rand() % sceneColumns * blockSize;
         BaseType y = this->scene->getSize()[1] - blockSize * 4;
 
-        auto tetromino = std::shared_ptr<Tetromino>(new Tetromino(
-            { x, y },
-            blockSize,
-            { 255, 0, 0 },
-            shape));
+        auto tetromino = Tetromino::createRandom({ x, y }, blockSize);
+
         tetrominos.insert(tetromino);
         this->scene->getRootObject()->addChild(tetromino);
     });
@@ -96,7 +88,8 @@ void GameLogic::handleTimer()
                     break;
                 }
 
-                if (positionInMap[0] >= 0 && positionInMap[1] > 0) {
+                if (positionInMap[0] >= 0 && positionInMap[1] > 0
+                    && positionInMap[0] < sceneColumns && positionInMap[1] < sceneRows) {
                     auto& cell = this->sceneMap->getData()
                                      [static_cast<size_t>(positionInMap[1] - 1)]
                                      [static_cast<size_t>(positionInMap[0])];
@@ -114,6 +107,10 @@ void GameLogic::handleTimer()
         }
 
         if (canBeMoved) {
+            // TODO: refactor
+            /*tetromino->setPosition(
+                tetromino->getPosition()
+                - game_math::Vector<2, BaseType>({ 0, blockSize }));*/
             for (auto child : tetromino->getChildren()) {
                 if (auto movableChild
                     = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {

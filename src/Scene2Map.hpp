@@ -9,6 +9,8 @@
 #include <memory>
 #include <unordered_set>
 
+// TODO: fix objects overlaying each other
+
 /**
  * Scene2Map - map of objects inside 2 dimensional scene
  */
@@ -94,6 +96,7 @@ void Scene2Map<BaseType, nRows, nColumns>::handleObjectPositionChanged(
         previousCell.erase(object);
     }
 
+    // TODO: fix out of scene objects!!!
     if (object->getPosition()[0] >= BaseType() && object->getPosition()[0] <= scene->getSize()[0]
         && object->getPosition()[1] >= BaseType() && object->getPosition()[1] <= scene->getSize()[1]) {
 
