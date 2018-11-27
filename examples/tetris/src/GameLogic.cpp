@@ -8,13 +8,14 @@ using namespace game_math;
 
 GameLogic::GameLogic(
     const std::shared_ptr<TetrisScene>& scene,
-    const std::shared_ptr<SceneMap<nDimensions, BaseType, 3>>& sceneMap,
+    const std::shared_ptr<Scene2Map<BaseType, sceneRows, sceneColumns>>& sceneMap,
     const std::shared_ptr<TimersProcessor>& timersProcessor)
     : scene(scene)
+    , sceneMap(sceneMap)
     , timersProcessor(timersProcessor)
 {
-    if (!scene || !timersProcessor) {
-        throw Exception("invalid scene or timers processor");
+    if (!scene || !timersProcessor || !sceneMap) {
+        throw Exception("invalid scene or timers processor or scene map");
     }
 
     auto root = std::make_shared<MovableGameObject<nDimensions, BaseType>>(
@@ -49,17 +50,39 @@ GameLogic::GameLogic(
             for (auto child : tetromino->getChildren()) {
                 if (auto movableChild
                     = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {
-                    auto position = movableChild->getPosition();
 
-                    position[1] -= blockSize;
-                    if (position[1] < 0) {
-                        position[1] = 0;
+                    auto position = movableChild->getPosition();
+                    game_math::Vector<2, int> positionInMap = position;
+                    positionInMap[0] /= blockSize;
+                    positionInMap[1] /= blockSize;
+
+                    if (positionInMap[0] >= 0 && positionInMap[1] > 0) {
+                        if (this->sceneMap->getData()
+                                [static_cast<size_t>(positionInMap[1] - 1)]
+                                [static_cast<size_t>(positionInMap[0])]
+                                    .size()
+                            == 0) {
+
+                            position[1] -= blockSize;
+                        }
                     }
+
+                    /*if (position[1] < 0) {
+                        position[1] = 0;
+                    }*/
 
                     movableChild->setPosition(position);
                 }
             }
         }
+
+        for (size_t row = 0; row < sceneRows; ++row) {
+            for (size_t column = 0; column < sceneColumns; ++column) {
+                std::cout << this->sceneMap->getData()[row][column].size() << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
     });
 }
 

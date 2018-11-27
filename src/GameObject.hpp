@@ -70,6 +70,8 @@ private:
         const std::shared_ptr<GameObject>& root,
         const std::shared_ptr<GameObject>& object) -> bool;
 
+    void setSceneRecursively(const std::shared_ptr<Scene<Size, Type>>& value);
+
     String name;
     GameObject* parent = nullptr;
     std::unordered_set<std::shared_ptr<GameObject>> children;
@@ -94,7 +96,7 @@ GameObject<Size, Type>::~GameObject()
 template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::addChild(const std::shared_ptr<GameObject>& child)
 {
-    child->scene = scene;
+    child->setSceneRecursively(scene);
 
     children.insert(child);
 
@@ -173,6 +175,15 @@ bool GameObject<Size, Type>::objectsTreeContainsItem(
     }
 
     return false;
+}
+
+template <std::size_t Size, typename Type>
+void GameObject<Size, Type>::setSceneRecursively(const std::shared_ptr<Scene<Size, Type>>& value)
+{
+    scene = value;
+    for (const auto& child : children) {
+        child->setSceneRecursively(scene);
+    }
 }
 
 template <std::size_t Size, typename Type>

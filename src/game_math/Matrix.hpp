@@ -20,7 +20,12 @@ public:
     Matrix(const RowType (&array)[nRows]);
     // Matrix(std::initializer_list<Type> initializerList);
 
-    auto operator[](std::size_t index) -> RowType;
+    /**
+     * @brief operator [] - get row by index
+     * @param index
+     * @return
+     */
+    auto operator[](std::size_t index) -> RowType&;
     auto operator[](std::size_t index) const -> const RowType&;
     auto operator==(const Matrix<nRows, nColumns, BaseType>& other) const -> bool;
     auto operator!=(const Matrix<nRows, nColumns, BaseType>& other) const -> bool;
@@ -56,26 +61,27 @@ Matrix<nRows, nColumns, BaseType>::Matrix(const Matrix::RowType (&array)[nRows])
 }
 
 template <std::size_t nRows, std::size_t nColumns, typename BaseType>
-auto Matrix<nRows, nColumns, BaseType>::operator[](std::size_t index) -> Vector<nColumns, BaseType>
+auto Matrix<nRows, nColumns, BaseType>::operator[](std::size_t index) -> RowType&
 {
     return data[index];
 }
 
 template <std::size_t nRows, std::size_t nColumns, typename BaseType>
-auto Matrix<nRows, nColumns, BaseType>::operator[](std::size_t index) const
-    -> const Vector<nColumns, BaseType>&
+auto Matrix<nRows, nColumns, BaseType>::operator[](std::size_t index) const -> const RowType&
 {
     return data[index];
 }
 
 template <std::size_t nRows, std::size_t nColumns, typename BaseType>
-bool Matrix<nRows, nColumns, BaseType>::operator==(const Matrix<nRows, nColumns, BaseType>& other) const
+bool Matrix<nRows, nColumns, BaseType>::operator==(
+    const Matrix<nRows, nColumns, BaseType>& other) const
 {
     return data == other.data;
 }
 
 template <std::size_t nRows, std::size_t nColumns, typename BaseType>
-bool Matrix<nRows, nColumns, BaseType>::operator!=(const Matrix<nRows, nColumns, BaseType>& other) const
+bool Matrix<nRows, nColumns, BaseType>::operator!=(
+    const Matrix<nRows, nColumns, BaseType>& other) const
 {
     return data != other.data;
 }
@@ -130,7 +136,7 @@ void Matrix<nRows, nColumns, BaseType>::rotateCounterclockwise()
 
 template <std::size_t nRows, std::size_t nColumns, typename BaseType>
 auto Matrix<nRows, nColumns, BaseType>::getData() const
-    -> const std::array<Vector<nColumns, BaseType>, nRows>&
+    -> const DataType&
 {
     return data;
 }

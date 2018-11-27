@@ -82,6 +82,22 @@ TEST_CASE("GameObjects reparenting", "[GameObject]")
 
 TEST_CASE("Matrices operations", "[Matrix]")
 {
+    game_math::Matrix<3, 3, int> m0({
+        { 1, 2, 3 },
+        { 4, 5, 6 },
+        { 7, 8, 9 },
+    });
+
+    m0[0][0] = 99;
+    m0[1][1] = -5;
+    m0[1][2] = -4;
+
+    CHECK(m0 == decltype(m0)({
+                    { 99, 2, 3 },
+                    { 4, -5, -4 },
+                    { 7, 8, 9 },
+                }));
+
     Matrix<2, 2, int> m1({
         { 1, 2 },
         { 3, 4 },

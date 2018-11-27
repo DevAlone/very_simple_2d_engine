@@ -45,7 +45,7 @@ private:
     // std::vector<std::shared_ptr<GameObject<Size, Type>>> objects;
     std::shared_ptr<GameObject<Size, Type>> rootObject;
 
-    game_math::Vector<Size, Type> size;
+    const game_math::Vector<Size, Type> size;
 
     std::vector<std::function<void(const MovableGameObject<Size, Type>*,
         const game_math::Vector<Size, Type>&)>>
