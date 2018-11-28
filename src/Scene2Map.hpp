@@ -6,10 +6,13 @@
 #include "game_math/game_math.h"
 
 #include <array>
+#include <cassert>
+#include <functional>
 #include <memory>
 #include <unordered_set>
 
 // TODO: fix objects overlaying each other
+// TODO: cover with unit tests
 
 /**
  * Scene2Map - map of objects inside 2 dimensional scene
@@ -34,12 +37,23 @@ public:
     auto getData() const -> const game_math::Matrix<nRows, nColumns, ElementsSet>&;
 
 private:
+    auto getCellsForRectangle(
+        game_math::Vector<2, BaseType> position,
+        game_math::Vector<2, BaseType> size) -> std::vector<std::reference_wrapper<ElementsSet>>;
+
     void handleObjectPositionChanged(
         const MovableGameObject<2, BaseType>* object,
         const game_math::Vector<2, BaseType>& previousPosition);
 
     const std::shared_ptr<Scene<2, BaseType>> scene;
+
+    std::unordered_map<const MovableGameObject<2, BaseType>*,
+        std::vector<std::reference_wrapper<ElementsSet>>>
+
+        elementCellsMap;
+
     game_math::Matrix<nRows, nColumns, ElementsSet> data;
+
     game_math::Vector<2, BaseType> cellSize;
 };
 
@@ -73,11 +87,78 @@ void Scene2Map<BaseType, nRows, nColumns>::processFrame(int32_t)
 }
 
 template <typename BaseType, size_t nRows, size_t nColumns>
+auto Scene2Map<BaseType, nRows, nColumns>::getCellsForRectangle(
+    game_math::Vector<2, BaseType> position,
+    game_math::Vector<2, BaseType> size)
+    -> std::vector<std::reference_wrapper<ElementsSet>>
+{
+    // ignore items which are not in the scene at all
+    if (position[0] >= scene->getSize()[0]) {
+        return {};
+    }
+    if (position[1] >= scene->getSize()[1]) {
+        return {};
+    }
+    if (position[0] + size[0] <= BaseType()) {
+        return {};
+    }
+    if (position[1] + size[1] <= BaseType()) {
+        return {};
+    }
+
+    // normalize values which are in the scene at least partly to not overflow the matrix
+    if (position[0] < BaseType()) {
+        position[0] = BaseType();
+    }
+    if (position[1] < BaseType()) {
+        position[1] = BaseType();
+    }
+
+    if (size[0] < BaseType()) {
+        size[0] = BaseType();
+    }
+    if (size[1] < BaseType()) {
+        size[1] = BaseType();
+    }
+
+    if (size[0] > scene->getSize()[0]) {
+        size[0] = scene->getSize()[0];
+    }
+    if (size[1] > scene->getSize()[1]) {
+        size[1] = scene->getSize()[1];
+    }
+
+    if (position[0] + size[0] > scene->getSize()[0]) {
+        position[0] = scene->getSize()[0] - size[0];
+    }
+    if (position[1] + size[1] > scene->getSize()[1]) {
+        position[1] = scene->getSize()[1] - size[1];
+    }
+
+    size_t startColumn = position[0] / cellSize[0];
+    size_t startRow = position[1] / cellSize[1];
+
+    size_t endColumn = (position[0] + size[0]) / cellSize[0];
+    size_t endRow = (position[1] + size[1]) / cellSize[1];
+
+    std::vector<std::reference_wrapper<ElementsSet>> result;
+
+    for (size_t nRow = startRow; nRow < endRow; ++nRow) {
+        for (size_t nColumn = startColumn; nColumn < endColumn; nColumn++) {
+            result.push_back(data[nRow][nColumn]);
+        }
+    }
+
+    return result;
+}
+
+template <typename BaseType, size_t nRows, size_t nColumns>
 void Scene2Map<BaseType, nRows, nColumns>::handleObjectPositionChanged(
     const MovableGameObject<2, BaseType>* object,
     const game_math::Vector<2, BaseType>& previousPosition)
 {
-    // TODO: add debug check on object ptr
+    assert(object != nullptr);
+
     std::cout
         << "object "
         << *object
@@ -85,28 +166,21 @@ void Scene2Map<BaseType, nRows, nColumns>::handleObjectPositionChanged(
         << previousPosition
         << std::endl;
 
-    if (previousPosition[0] >= BaseType() && previousPosition[0] <= scene->getSize()[0]
-        && previousPosition[1] >= BaseType() && previousPosition[1] <= scene->getSize()[1]) {
-
-        auto cellPreviousIndex = previousPosition;
-        cellPreviousIndex[0] /= cellSize[0];
-        cellPreviousIndex[1] /= cellSize[1];
-
-        auto& previousCell = data[cellPreviousIndex[1]][cellPreviousIndex[0]];
-        previousCell.erase(object);
+    {
+        // remove from old cells
+        auto it = elementCellsMap.find(object);
+        if (it != elementCellsMap.end()) {
+            for (ElementsSet& cell : it->second) {
+                cell.erase(object);
+            }
+            elementCellsMap.erase(object);
+        }
     }
 
-    // TODO: fix out of scene objects!!!
-    if (object->getPosition()[0] >= BaseType() && object->getPosition()[0] <= scene->getSize()[0]
-        && object->getPosition()[1] >= BaseType() && object->getPosition()[1] <= scene->getSize()[1]) {
-
-        auto cellPreviousIndex = previousPosition;
-        auto cellIndex = object->getPosition();
-        cellIndex[0] /= cellSize[0];
-        cellIndex[1] /= cellSize[1];
-
-        auto& cell = data[cellIndex[1]][cellIndex[0]];
+    // insert to new cells
+    for (ElementsSet& cell : getCellsForRectangle(object->getPosition(), object->getSize())) {
         cell.insert(object);
+        elementCellsMap[object].push_back(cell);
     }
 }
 
