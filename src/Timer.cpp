@@ -20,3 +20,13 @@ size_t Timer::getIntervalMicroseconds() const
 {
     return intervalMicroseconds;
 }
+
+void Timer::setInterval(size_t valueMicroseconds)
+{
+    intervalMicroseconds = valueMicroseconds;
+}
+
+void Timer::resetLastProcessingTime()
+{
+    lastProcessingTime = 0;
+}

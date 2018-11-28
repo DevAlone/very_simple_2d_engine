@@ -30,6 +30,10 @@ public:
 
     void subscribeOnKey(
         Key key,
+        const std::function<void(const KeyEvent& event)> onKeyPress);
+
+    void subscribeOnKey(
+        Key key,
         const std::function<void()> onKeyPress,
         const std::function<void()> onKeyHold,
         const std::function<void()> onKeyRelease);
@@ -38,6 +42,10 @@ public:
         Key key,
         const std::function<void()> onKeyPress,
         const std::function<void()> onKeyRelease);
+
+    void subscribeOnKey(
+        Key key,
+        const std::function<void()> onKeyPress);
 
     virtual void onModuleCreation() override;
 

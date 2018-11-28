@@ -5,6 +5,7 @@
 #include "TimersProcessor.h"
 
 using namespace game_math;
+using namespace globals;
 
 GameLogic::GameLogic(
     const std::shared_ptr<TetrisScene>& scene,
@@ -25,39 +26,9 @@ GameLogic::GameLogic(
     // TODO: refactor
     Scene<nDimensions, BaseType>::setRootObject(scene, root);
 
-    /*auto shape = Matrix<4, 4, bool>(
-        { { 1, 0, 0, 0 },
-            { 1, 0, 1, 0 },
-            { 1, 0, 0, 0 },
-            { 0, 1, 1, 1 } });
-
-    BaseType x = 0;
-    BaseType y = scene->getSize()[1] - blockSize * 4;
-
-    auto tetromino = std::shared_ptr<Tetromino>(new Tetromino(
-        { x, y },
-        blockSize,
-        { 255, 0, 0 },
-        shape));
-
-    tetrominos.insert(tetromino);
-    root->addChild(tetromino);*/
-
-    //scene->setRootObject(root);
-
-    timersProcessor->createTimer(1000 * 1000 * 0.5f)->addHandler([this] {
+    fallingTimer = timersProcessor->createTimer(1000 * 1000 * 1);
+    fallingTimer->addHandler([this] {
         this->handleTimer();
-    });
-
-    timersProcessor->createTimer(1000 * 1000 * 2.5f)->addHandler([this] {
-        // TODO: fix random
-        BaseType x = rand() % sceneColumns * blockSize;
-        BaseType y = this->scene->getSize()[1] - blockSize * 4;
-
-        auto tetromino = Tetromino::createRandom({ x, y }, blockSize);
-
-        tetrominos.insert(tetromino);
-        this->scene->getRootObject()->addChild(tetromino);
     });
 }
 
@@ -69,60 +40,56 @@ void GameLogic::processFrame(int32_t)
 {
 }
 
+void GameLogic::tryToMoveCurrentTetrominoRight()
+{
+    if (currentTetromino && canTetrominoBeMoved(currentTetromino, { 1, 0 })) {
+        currentTetromino->move({ blockSize, 0 });
+    }
+}
+
+void GameLogic::tryToMoveCurrentTetrominoLeft()
+{
+    if (currentTetromino && canTetrominoBeMoved(currentTetromino, { -1, 0 })) {
+        currentTetromino->move({ -blockSize, 0 });
+    }
+}
+
+void GameLogic::moveCurrentTetrominoDown()
+{
+    if (currentTetromino) {
+        while (canTetrominoBeMoved(currentTetromino, { 0, -1 })) {
+            currentTetromino->move({ 0, -blockSize });
+        }
+        currentTetromino = nullptr;
+    }
+}
+
+void GameLogic::rotateCurrentTetrominoClockwise()
+{
+    if (currentTetromino) {
+        if (canTetrominoBeRotatedClockwise(currentTetromino)) {
+            currentTetromino->rotateClockwise();
+        }
+    }
+}
+
 void GameLogic::handleTimer()
 {
-    for (auto tetromino : tetrominos) {
-        bool canBeMoved = true;
-
-        for (auto child : tetromino->getChildren()) {
-            if (auto movableChild
-                = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {
-
-                auto position = movableChild->getPosition();
-                game_math::Vector<2, int> positionInMap = position;
-                positionInMap[0] /= blockSize;
-                positionInMap[1] /= blockSize;
-
-                if (positionInMap[0] < 0 || positionInMap[1] <= 0) {
-                    canBeMoved = false;
-                    break;
-                }
-
-                if (positionInMap[0] >= 0 && positionInMap[1] > 0
-                    && positionInMap[0] < sceneColumns && positionInMap[1] < sceneRows) {
-                    auto& cell = this->sceneMap->getData()
-                                     [static_cast<size_t>(positionInMap[1] - 1)]
-                                     [static_cast<size_t>(positionInMap[0])];
-
-                    for (const auto& item : cell) {
-                        if (item->getParent() != tetromino.get()) {
-                            canBeMoved = false;
-                            break;
-                        }
-                    }
-                }
-
-                // movableChild->setPosition(position);
-            }
+    if (currentTetromino) {
+        if (canTetrominoBeMoved(currentTetromino, { 0, -1 })) {
+            currentTetromino->move({ 0, -blockSize });
+        } else {
+            currentTetromino.reset();
         }
+    } else {
+        deleteLines();
 
-        if (canBeMoved) {
-            // TODO: refactor
-            /*tetromino->setPosition(
-                tetromino->getPosition()
-                - game_math::Vector<2, BaseType>({ 0, blockSize }));*/
-            for (auto child : tetromino->getChildren()) {
-                if (auto movableChild
-                    = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {
+        BaseType x = (rand() % (sceneColumns - BaseType(blocksPerTetromino))) * blockSize;
+        BaseType y = this->scene->getSize()[1];
 
-                    auto position = movableChild->getPosition();
+        currentTetromino = Tetromino::createRandom({ x, y }, blockSize);
 
-                    position[1] -= blockSize;
-
-                    movableChild->setPosition(position);
-                }
-            }
-        }
+        this->scene->getRootObject()->addChild(currentTetromino);
     }
 
     for (size_t row = 0; row < sceneRows; ++row) {
@@ -132,4 +99,93 @@ void GameLogic::handleTimer()
         std::cout << std::endl;
     }
     std::cout << std::endl;
+
+    /*
+    fallingTimerPeriod = size_t(float(fallingTimerPeriod) * fallingPeriodChangingCoefficient);
+    if (fallingTimerPeriod < minimumFallingPeriod) {
+        fallingTimerPeriod = minimumFallingPeriod;
+    }
+    fallingTimer->setInterval(fallingTimerPeriod);
+    */
+}
+
+bool GameLogic::canTetrominoBeMoved(
+    const std::shared_ptr<Tetromino>& tetromino,
+    const game_math::Vector<2, BaseType>& direction) const
+{
+    for (auto child : tetromino->getChildren()) {
+        if (auto movableChild
+            = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {
+
+            auto position = movableChild->getPosition();
+            game_math::Vector<2, BaseType> positionInMap = position;
+            positionInMap[0] /= blockSize;
+            positionInMap[1] /= blockSize;
+
+            auto newPositionInMap = positionInMap + direction;
+
+            if ((direction[0] <= BaseType(0) && newPositionInMap[0] < BaseType(0))
+                || (direction[0] >= BaseType(0) && newPositionInMap[0] >= sceneColumns)) {
+                return false;
+            }
+            if ((direction[1] <= BaseType(0) && newPositionInMap[1] < BaseType(0))
+                || (direction[1] >= BaseType(0) && newPositionInMap[1] >= sceneRows)) {
+                return false;
+            }
+
+            auto& cell = this->sceneMap->getData()
+                             [static_cast<size_t>(newPositionInMap[1])]
+                             [static_cast<size_t>(newPositionInMap[0])];
+
+            for (const auto& item : cell) {
+                if (item->getParent() != tetromino.get()) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+bool GameLogic::canTetrominoBeRotatedClockwise(std::shared_ptr<Tetromino>& tetromino) const
+{
+    tetromino->rotateClockwise();
+    for (size_t row = 0; row < sceneRows; ++row) {
+        for (size_t column = 0; column < sceneColumns; ++column) {
+            std::cout << this->sceneMap->getData()[row][column].size() << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    bool result = canTetrominoBeMoved(tetromino, { 0, 0 });
+    tetromino->rotateCounterclockwise();
+
+    return result;
+}
+
+void GameLogic::deleteLines()
+{
+    // TODO: fix bug
+
+    for (size_t nRow = 0; nRow < globals::sceneRows; ++nRow) {
+        bool needsToBeRemoved = true;
+        for (size_t nColumn = 0; nColumn < globals::sceneColumns; ++nColumn) {
+            if (sceneMap->getData()[nRow][nColumn].size() == 0) {
+                needsToBeRemoved = false;
+                break;
+            }
+        }
+
+        if (needsToBeRemoved) {
+            for (size_t nColumn = 0; nColumn < globals::sceneColumns; ++nColumn) {
+                for (auto blockPtr : sceneMap->getData()[nRow][nColumn]) {
+                    if (auto tetromino = dynamic_cast<Tetromino*>(blockPtr->getParent())) {
+                        tetromino->removeChild(blockPtr);
+                    }
+                }
+            }
+        }
+    }
 }

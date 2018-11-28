@@ -18,7 +18,7 @@ public:
     auto getSize() const -> const game_math::Vector<Size, Type>&;
     auto setSize(const game_math::Vector<Size, Type>& value) -> void;
 
-protected:
+private:
     game_math::Vector<Size, Type> position;
     game_math::Vector<Size, Type> size;
 };
@@ -52,7 +52,7 @@ void MovableGameObject<Size, Type>::setPosition(const game_math::Vector<Size, Ty
     auto oldPosition = position;
     position = value;
     if (this->scene) {
-        this->scene->notifyOnObjectPositionChanged(this, oldPosition);
+        this->scene->getOnObjectPositionChangedSignal()(this, oldPosition);
     }
 }
 

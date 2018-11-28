@@ -12,6 +12,15 @@ public:
     void addHandler(std::function<void()> handler);
     auto getHandlers() const -> const std::vector<std::function<void()>>&;
     auto getIntervalMicroseconds() const -> size_t;
+    /**
+     * @brief setInterval - set interval in microseconds
+     * @param intervalMicroseconds
+     */
+    void setInterval(size_t valueMicroseconds);
+    /**
+     * @brief resetLastProcessingTime - resets last processing time to make time start again asap
+     */
+    void resetLastProcessingTime();
 
 private:
     std::vector<std::function<void()>> handlers;

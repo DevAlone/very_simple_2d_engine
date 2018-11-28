@@ -3,6 +3,7 @@
 #include "GameObject.hpp"
 #include "Module.h"
 #include "MovableGameObject.hpp"
+#include "boost/signals2.hpp"
 #include "game_math/Vector.hpp"
 
 #include <algorithm>
@@ -22,34 +23,34 @@ class Scene : public Module {
     template <std::size_t S, typename T>
     friend class MovableGameObject;
 
+    using OnObjectPositionChangedSignal
+        = boost::signals2::signal<void(MovableGameObject<Size, Type>*,
+            const game_math::Vector<Size, Type>&)>;
+
+    using OnObjectRemovedSignal = boost::signals2::signal<void(GameObject<Size, Type>*)>;
+
 public:
     Scene(const game_math::Vector<Size, Type>& size);
 
-    auto getRootObject() const -> const std::shared_ptr<GameObject<Size, Type>>&;
     static auto setRootObject(
         const std::shared_ptr<Scene<Size, Type>>& scene,
         const std::shared_ptr<GameObject<Size, Type>>& value) -> void;
 
+    auto getRootObject() const -> const std::shared_ptr<GameObject<Size, Type>>&;
     auto getSize() const -> const game_math::Vector<Size, Type>&;
-    void subscribeOnObjectPositionChanged(
-        std::function<void(const MovableGameObject<Size, Type>*,
-            const game_math::Vector<Size, Type>&)>
-            callback);
+    auto getOnObjectPositionChangedSignal() -> OnObjectPositionChangedSignal&;
+    auto getOnObjectRemovedSignal() -> OnObjectRemovedSignal&;
 
 private:
     // void removeObjects(const std::shared_ptr<GameObject<Size, Type>>& object);
-    void notifyOnObjectPositionChanged(
-        const MovableGameObject<Size, Type>* object,
-        const game_math::Vector<Size, Type>& oldPosition);
 
     // std::vector<std::shared_ptr<GameObject<Size, Type>>> objects;
     std::shared_ptr<GameObject<Size, Type>> rootObject;
 
     const game_math::Vector<Size, Type> size;
 
-    std::vector<std::function<void(const MovableGameObject<Size, Type>*,
-        const game_math::Vector<Size, Type>&)>>
-        onObjectPositionChangedSubscriptions;
+    OnObjectPositionChangedSignal onObjectPositionChangedSignal;
+    OnObjectRemovedSignal onObjectRemovedSignal;
 };
 
 template <std::size_t Size, typename Type>
@@ -74,6 +75,10 @@ auto Scene<Size, Type>::setRootObject(
     const std::shared_ptr<Scene<Size, Type>>& scene,
     const std::shared_ptr<GameObject<Size, Type>>& value) -> void
 {
+    if (scene->rootObject) {
+        scene->getOnObjectRemovedSignal()(scene->rootObject.get());
+        scene->rootObject->scene.reset();
+    }
     scene->rootObject = value;
     scene->rootObject->scene = scene;
 }
@@ -85,22 +90,15 @@ auto Scene<Size, Type>::getSize() const -> const game_math::Vector<Size, Type>&
 }
 
 template <std::size_t Size, typename Type>
-void Scene<Size, Type>::subscribeOnObjectPositionChanged(
-    std::function<void(const MovableGameObject<Size, Type>*,
-        const game_math::Vector<Size, Type>&)>
-        callback)
+auto Scene<Size, Type>::getOnObjectPositionChangedSignal() -> OnObjectPositionChangedSignal&
 {
-    onObjectPositionChangedSubscriptions.push_back(callback);
+    return onObjectPositionChangedSignal;
 }
 
 template <std::size_t Size, typename Type>
-void Scene<Size, Type>::notifyOnObjectPositionChanged(
-    const MovableGameObject<Size, Type>* object,
-    const game_math::Vector<Size, Type>& oldPosition)
+auto Scene<Size, Type>::getOnObjectRemovedSignal() -> OnObjectRemovedSignal&
 {
-    for (const auto& function : onObjectPositionChangedSubscriptions) {
-        function(object, oldPosition);
-    }
+    return onObjectRemovedSignal;
 }
 
 /*template <std::size_t Size, typename Type>

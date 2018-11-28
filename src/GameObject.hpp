@@ -14,6 +14,7 @@ class Scene;
 #include "SDL_image.h"
 #include "game_math/Vector.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <unordered_set>
@@ -33,8 +34,9 @@ class GameObject {
 public:
     virtual ~GameObject();
 
+    virtual auto removeChild(const std::shared_ptr<GameObject>& child) -> void;
+    virtual auto removeChild(GameObject* child) -> void;
     auto addChild(const std::shared_ptr<GameObject>& child) -> void;
-    auto removeChild(const std::shared_ptr<GameObject>& child) -> void;
     auto getChildren() -> std::unordered_set<std::shared_ptr<GameObject>>&;
     auto setTextureFromFile(const std::string& filename, SDL_Renderer* renderer) -> void;
     auto getTexture() const -> SDL_Texture*;
@@ -59,7 +61,6 @@ public:
 protected:
     std::shared_ptr<Scene<Size, Type>> scene;
 
-private:
     /**
      * @brief objectsTreeContainItem - looks for object in tree
      * @param root - tree root
@@ -71,6 +72,7 @@ private:
         const std::shared_ptr<GameObject>& object) -> bool;
 
     void setSceneRecursively(const std::shared_ptr<Scene<Size, Type>>& value);
+    void removeSceneRecursively();
 
     String name;
     GameObject* parent = nullptr;
@@ -120,8 +122,21 @@ void GameObject<Size, Type>::addChild(const std::shared_ptr<GameObject>& child)
 template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::removeChild(const std::shared_ptr<GameObject>& child)
 {
+    removeChild(child.get());
+}
+
+template <std::size_t Size, typename Type>
+void GameObject<Size, Type>::removeChild(GameObject* child)
+{
     child->parent = nullptr;
-    children.erase(child);
+    child->removeSceneRecursively();
+    child->scene.reset();
+    auto it = std::find_if(children.begin(), children.end(), [child](const auto& item) {
+        return item.get() == child;
+    });
+    if (it != children.end()) {
+        children.erase(it);
+    }
 }
 
 template <std::size_t Size, typename Type>
@@ -181,8 +196,23 @@ template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::setSceneRecursively(const std::shared_ptr<Scene<Size, Type>>& value)
 {
     scene = value;
+    if (scene) {
+        // TODO: notify scene about it
+    }
     for (const auto& child : children) {
         child->setSceneRecursively(scene);
+    }
+}
+
+template <std::size_t Size, typename Type>
+void GameObject<Size, Type>::removeSceneRecursively()
+{
+    if (scene) {
+        scene->getOnObjectRemovedSignal()(this);
+    }
+    scene.reset();
+    for (const auto& child : children) {
+        child->removeSceneRecursively();
     }
 }
 

@@ -20,7 +20,7 @@
 template <typename BaseType, size_t nRows, size_t nColumns>
 class Scene2Map : public Module {
     using ScenePtr = std::shared_ptr<Scene<2, BaseType>>;
-    using ElementsSet = std::unordered_set<const MovableGameObject<2, BaseType>*>;
+    using ElementsSet = std::unordered_set<MovableGameObject<2, BaseType>*>;
     // using GameObjectPtr = std::shared_ptr<MovableGameObject<2, BaseType>>;
 
 public:
@@ -42,8 +42,10 @@ private:
         game_math::Vector<2, BaseType> size) -> std::vector<std::reference_wrapper<ElementsSet>>;
 
     void handleObjectPositionChanged(
-        const MovableGameObject<2, BaseType>* object,
+        MovableGameObject<2, BaseType>* object,
         const game_math::Vector<2, BaseType>& previousPosition);
+
+    void handleObjectRemoved(GameObject<2, BaseType>* object);
 
     const std::shared_ptr<Scene<2, BaseType>> scene;
 
@@ -69,11 +71,13 @@ Scene2Map<BaseType, nRows, nColumns>::Scene2Map(const ScenePtr& scene)
     cellSize[0] /= nColumns;
     cellSize[1] /= nRows;
 
-    scene->subscribeOnObjectPositionChanged(
-        [this](const MovableGameObject<2, BaseType>* object,
-            const game_math::Vector<2, BaseType>& position) {
-            handleObjectPositionChanged(object, position);
-        });
+    scene->getOnObjectPositionChangedSignal().connect([this](auto object, auto position) {
+        handleObjectPositionChanged(object, position);
+    });
+
+    scene->getOnObjectRemovedSignal().connect([this](auto object) {
+        handleObjectRemoved(object);
+    });
 }
 
 template <typename BaseType, size_t nRows, size_t nColumns>
@@ -154,7 +158,7 @@ auto Scene2Map<BaseType, nRows, nColumns>::getCellsForRectangle(
 
 template <typename BaseType, size_t nRows, size_t nColumns>
 void Scene2Map<BaseType, nRows, nColumns>::handleObjectPositionChanged(
-    const MovableGameObject<2, BaseType>* object,
+    MovableGameObject<2, BaseType>* object,
     const game_math::Vector<2, BaseType>& previousPosition)
 {
     assert(object != nullptr);
@@ -181,6 +185,24 @@ void Scene2Map<BaseType, nRows, nColumns>::handleObjectPositionChanged(
     for (ElementsSet& cell : getCellsForRectangle(object->getPosition(), object->getSize())) {
         cell.insert(object);
         elementCellsMap[object].push_back(cell);
+    }
+}
+
+template <typename BaseType, size_t nRows, size_t nColumns>
+void Scene2Map<BaseType, nRows, nColumns>::handleObjectRemoved(GameObject<2, BaseType>* object)
+{
+    auto movableObject = dynamic_cast<MovableGameObject<2, BaseType>*>(object);
+    if (movableObject == nullptr) {
+        return;
+    }
+
+    auto it = elementCellsMap.find(movableObject);
+    if (it != elementCellsMap.end()) {
+
+        for (ElementsSet& cell : it->second) {
+            cell.erase(movableObject);
+        }
+        elementCellsMap.erase(movableObject);
     }
 }
 
