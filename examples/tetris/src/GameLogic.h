@@ -35,7 +35,8 @@ private:
 
     bool canTetrominoBeRotatedClockwise(std::shared_ptr<Tetromino>& tetromino) const;
 
-    void deleteLines();
+    bool tryToDeleteLines();
+    void moveLinesDown(size_t startLineNumber);
 
     std::shared_ptr<TetrisScene> scene;
 
@@ -47,4 +48,5 @@ private:
     std::shared_ptr<Tetromino> currentTetromino;
     size_t fallingTimerPeriod = globals::maximumFallingPeriod;
     std::shared_ptr<Timer> fallingTimer;
+    bool gameEnded = false;
 };

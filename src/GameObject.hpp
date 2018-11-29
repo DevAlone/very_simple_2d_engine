@@ -34,8 +34,9 @@ class GameObject {
 public:
     virtual ~GameObject();
 
-    virtual auto removeChild(const std::shared_ptr<GameObject>& child) -> void;
+    auto removeChild(const std::shared_ptr<GameObject>& child) -> void;
     virtual auto removeChild(GameObject* child) -> void;
+
     auto addChild(const std::shared_ptr<GameObject>& child) -> void;
     auto getChildren() -> std::unordered_set<std::shared_ptr<GameObject>>&;
     auto setTextureFromFile(const std::string& filename, SDL_Renderer* renderer) -> void;
@@ -59,7 +60,7 @@ public:
     }
 
 protected:
-    std::shared_ptr<Scene<Size, Type>> scene;
+    std::weak_ptr<Scene<Size, Type>> sceneWeakPtr;
 
     /**
      * @brief objectsTreeContainItem - looks for object in tree
@@ -72,6 +73,7 @@ protected:
         const std::shared_ptr<GameObject>& object) -> bool;
 
     void setSceneRecursively(const std::shared_ptr<Scene<Size, Type>>& value);
+
     void removeSceneRecursively();
 
     String name;
@@ -98,8 +100,6 @@ GameObject<Size, Type>::~GameObject()
 template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::addChild(const std::shared_ptr<GameObject>& child)
 {
-    child->setSceneRecursively(scene);
-
     children.insert(child);
 
     if (auto p = child->getParent()) {
@@ -117,6 +117,10 @@ void GameObject<Size, Type>::addChild(const std::shared_ptr<GameObject>& child)
     for (const auto& grandchild : grandchildrenToRemove) {
         child->removeChild(grandchild);
     }
+
+    if (auto scene = sceneWeakPtr.lock()) {
+        child->setSceneRecursively(scene);
+    }
 }
 
 template <std::size_t Size, typename Type>
@@ -130,7 +134,7 @@ void GameObject<Size, Type>::removeChild(GameObject* child)
 {
     child->parent = nullptr;
     child->removeSceneRecursively();
-    child->scene.reset();
+
     auto it = std::find_if(children.begin(), children.end(), [child](const auto& item) {
         return item.get() == child;
     });
@@ -195,22 +199,23 @@ bool GameObject<Size, Type>::objectsTreeContainsItem(
 template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::setSceneRecursively(const std::shared_ptr<Scene<Size, Type>>& value)
 {
-    scene = value;
-    if (scene) {
+    sceneWeakPtr = value;
+    if (auto scene = sceneWeakPtr.lock()) {
         // TODO: notify scene about it
     }
     for (const auto& child : children) {
-        child->setSceneRecursively(scene);
+        child->setSceneRecursively(value);
     }
 }
 
 template <std::size_t Size, typename Type>
 void GameObject<Size, Type>::removeSceneRecursively()
 {
-    if (scene) {
-        scene->getOnObjectRemovedSignal()(this);
+    if (auto scene = sceneWeakPtr.lock()) {
+        scene->onObjectRemovedSignal(this);
     }
-    scene.reset();
+    sceneWeakPtr.reset();
+
     for (const auto& child : children) {
         child->removeSceneRecursively();
     }

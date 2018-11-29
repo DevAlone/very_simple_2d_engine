@@ -20,9 +20,10 @@ public:
     /*static auto createCopy(
         const std::shared_ptr<Tetromino>& obj) -> std::shared_ptr<Tetromino>;*/
 
-    void move(const game_math::Vector<2, globals::BaseType>& direction);
     void rotateClockwise();
     void rotateCounterclockwise();
+
+    virtual void removeChild(GameObject* child) override;
 
 private:
     void initChildrenPositions();

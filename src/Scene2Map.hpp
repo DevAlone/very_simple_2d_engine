@@ -34,7 +34,13 @@ public:
     virtual void onModuleCreation() override;
     virtual void processFrame(int32_t deltaTime) override;
 
-    auto getData() const -> const game_math::Matrix<nRows, nColumns, ElementsSet>&;
+    auto getCellByIndex(size_t nRow, size_t nColumn) const -> ElementsSet;
+
+    // TODO: remove
+    /**
+     * @brief clean - cleans obsolete values from the map, do not call while iterating
+     */
+    void clean();
 
 private:
     auto getCellsForRectangle(
@@ -55,6 +61,10 @@ private:
         elementCellsMap;
 
     game_math::Matrix<nRows, nColumns, ElementsSet> data;
+    /*
+     std::vector<std::pair<std::reference_wrapper<ElementsSet>, MovableGameObject<2, BaseType>*>>
+        objectsToRemove;
+    */
 
     game_math::Vector<2, BaseType> cellSize;
 };
@@ -71,11 +81,11 @@ Scene2Map<BaseType, nRows, nColumns>::Scene2Map(const ScenePtr& scene)
     cellSize[0] /= nColumns;
     cellSize[1] /= nRows;
 
-    scene->getOnObjectPositionChangedSignal().connect([this](auto object, auto position) {
+    scene->subscribeOnObjectPositionChanged([this](auto object, auto position) {
         handleObjectPositionChanged(object, position);
     });
 
-    scene->getOnObjectRemovedSignal().connect([this](auto object) {
+    scene->subscribeOnObjectRemoved([this](auto object) {
         handleObjectRemoved(object);
     });
 }
@@ -89,6 +99,25 @@ template <typename BaseType, size_t nRows, size_t nColumns>
 void Scene2Map<BaseType, nRows, nColumns>::processFrame(int32_t)
 {
 }
+
+template <typename BaseType, size_t nRows, size_t nColumns>
+auto Scene2Map<BaseType, nRows, nColumns>::getCellByIndex(size_t nRow, size_t nColumn) const
+    -> ElementsSet
+{
+    return data[nRow][nColumn];
+}
+
+/*template <typename BaseType, size_t nRows, size_t nColumns>
+void Scene2Map<BaseType, nRows, nColumns>::clean()
+{
+    // TODO: syncronize with adding items to vector
+    for (const auto& pair : objectsToRemove) {
+        ElementsSet& cell = pair.first;
+        auto objectPtr = pair.second;
+        cell.erase(objectPtr);
+    }
+    objectsToRemove.clear();
+}*/
 
 template <typename BaseType, size_t nRows, size_t nColumns>
 auto Scene2Map<BaseType, nRows, nColumns>::getCellsForRectangle(
@@ -159,16 +188,9 @@ auto Scene2Map<BaseType, nRows, nColumns>::getCellsForRectangle(
 template <typename BaseType, size_t nRows, size_t nColumns>
 void Scene2Map<BaseType, nRows, nColumns>::handleObjectPositionChanged(
     MovableGameObject<2, BaseType>* object,
-    const game_math::Vector<2, BaseType>& previousPosition)
+    const game_math::Vector<2, BaseType>&)
 {
     assert(object != nullptr);
-
-    std::cout
-        << "object "
-        << *object
-        << " position changed, previous position"
-        << previousPosition
-        << std::endl;
 
     {
         // remove from old cells
@@ -200,15 +222,9 @@ void Scene2Map<BaseType, nRows, nColumns>::handleObjectRemoved(GameObject<2, Bas
     if (it != elementCellsMap.end()) {
 
         for (ElementsSet& cell : it->second) {
+            // objectsToRemove.push_back({ cell, movableObject });
             cell.erase(movableObject);
         }
         elementCellsMap.erase(movableObject);
     }
-}
-
-template <typename BaseType, size_t nRows, size_t nColumns>
-auto Scene2Map<BaseType, nRows, nColumns>::getData() const
-    -> const game_math::Matrix<nRows, nColumns, ElementsSet>&
-{
-    return data;
 }

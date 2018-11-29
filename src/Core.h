@@ -14,6 +14,9 @@ public:
     template <typename T, typename... Args>
     std::shared_ptr<T> addModuleOfType(Args... args);
 
+    template <typename T>
+    std::shared_ptr<T> getModuleOfType();
+
     void loop();
 
     void requestExit();
@@ -37,4 +40,18 @@ std::shared_ptr<T> Core::addModuleOfType(Args... args)
     auto module = std::make_shared<T>(args...);
     modules.push_back(module);
     return module;
+}
+
+template <typename T>
+std::shared_ptr<T> Core::getModuleOfType()
+{
+    static_assert(std::is_base_of<Module, T>::value, "have to be subclass of Module");
+
+    for (const auto& module : modules) {
+        if (auto moduleOfType = std::dynamic_pointer_cast<T>(module)) {
+            return moduleOfType;
+        }
+    }
+
+    return {};
 }

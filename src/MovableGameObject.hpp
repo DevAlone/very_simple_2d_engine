@@ -5,73 +5,93 @@
 
 #include <cstddef>
 
-template <std::size_t Size, typename Type>
-class MovableGameObject : public GameObject<Size, Type> {
+template <std::size_t nDimensions, typename BaseType>
+class MovableGameObject : public GameObject<nDimensions, BaseType> {
+    using VectorBaseType = game_math::Vector<nDimensions, BaseType>;
+
 public:
     MovableGameObject(
-        const game_math::Vector<Size, Type>& position = { 0, 0 },
-        const game_math::Vector<Size, Type>& size = { 0, 0 });
+        const VectorBaseType& position = { 0, 0 },
+        const VectorBaseType& size = { 0, 0 });
 
-    auto getPosition() const -> const game_math::Vector<Size, Type>&;
-    // auto getPositionRef() -> game_math::Vector<Size, Type>&;
-    auto setPosition(const game_math::Vector<Size, Type>& value) -> void;
-    auto getSize() const -> const game_math::Vector<Size, Type>&;
-    auto setSize(const game_math::Vector<Size, Type>& value) -> void;
+    auto getPosition() const -> const VectorBaseType&;
+    auto setPosition(const VectorBaseType& value) -> void;
+    auto getSize() const -> const VectorBaseType&;
+    auto setSize(const VectorBaseType& value) -> void;
+    auto move(const VectorBaseType& direction) -> void;
+    auto moveWithChildren(const VectorBaseType& direction) -> void;
 
 private:
-    game_math::Vector<Size, Type> position;
-    game_math::Vector<Size, Type> size;
+    VectorBaseType position;
+    VectorBaseType size;
 };
 
 using MovableGameObject2F = MovableGameObject<2, float>;
 
-template <std::size_t Size, typename Type>
-MovableGameObject<Size, Type>::MovableGameObject(
-    const game_math::Vector<Size, Type>& position,
-    const game_math::Vector<Size, Type>& size)
+template <std::size_t nDimensions, typename BaseType>
+MovableGameObject<nDimensions, BaseType>::MovableGameObject(
+    const VectorBaseType& position,
+    const VectorBaseType& size)
     : position(position)
     , size(size)
 {
 }
 
-/*template <std::size_t Size, typename Type>
-auto MovableGameObject<Size, Type>::getPositionRef() -> game_math::Vector<Size, Type>&
-{
-    return position;
-}*/
-
-template <std::size_t Size, typename Type>
-const game_math::Vector<Size, Type>& MovableGameObject<Size, Type>::getPosition() const
+template <std::size_t nDimensions, typename BaseType>
+auto MovableGameObject<nDimensions, BaseType>::getPosition() const
+    -> const VectorBaseType&
 {
     return position;
 }
 
-template <std::size_t Size, typename Type>
-void MovableGameObject<Size, Type>::setPosition(const game_math::Vector<Size, Type>& value)
+template <std::size_t nDimensions, typename BaseType>
+void MovableGameObject<nDimensions, BaseType>::setPosition(const VectorBaseType& value)
 {
     auto oldPosition = position;
     position = value;
-    if (this->scene) {
-        this->scene->getOnObjectPositionChangedSignal()(this, oldPosition);
+    if (auto scene = this->sceneWeakPtr.lock()) {
+        scene->onObjectPositionChangedSignal(this, oldPosition);
     }
 }
 
-template <std::size_t Size, typename Type>
-const game_math::Vector<Size, Type>& MovableGameObject<Size, Type>::getSize() const
+template <std::size_t nDimensions, typename BaseType>
+auto MovableGameObject<nDimensions, BaseType>::getSize() const
+    -> const VectorBaseType&
 {
     return size;
 }
 
-template <std::size_t Size, typename Type>
-void MovableGameObject<Size, Type>::setSize(const game_math::Vector<Size, Type>& value)
+template <std::size_t nDimensions, typename BaseType>
+void MovableGameObject<nDimensions, BaseType>::setSize(const VectorBaseType& value)
 {
     size = value;
 }
 
 template <std::size_t nDimensions, typename BaseType>
+void MovableGameObject<nDimensions, BaseType>::move(
+    const MovableGameObject::VectorBaseType& direction)
+{
+    setPosition(getPosition() + direction);
+}
+
+template <std::size_t nDimensions, typename BaseType>
+void MovableGameObject<nDimensions, BaseType>::moveWithChildren(
+    const MovableGameObject::VectorBaseType& direction)
+{
+    move(direction);
+    for (auto& child : this->getChildren()) {
+        if (auto movableChild
+            = std::dynamic_pointer_cast<MovableGameObject<nDimensions, BaseType>>(child)) {
+
+            movableChild->moveWithChildren(direction);
+        }
+    }
+}
+
+template <std::size_t nDimensions, typename BaseBaseType>
 std::ostream& operator<<(
     std::ostream& stream,
-    const MovableGameObject<nDimensions, BaseType>& obj)
+    const MovableGameObject<nDimensions, BaseBaseType>& obj)
 {
     return stream
         << "MovableGameObject { name: \""
@@ -83,10 +103,10 @@ std::ostream& operator<<(
         << "\" }";
 }
 
-template <std::size_t nDimensions, typename BaseType>
+template <std::size_t nDimensions, typename BaseBaseType>
 std::ostream& operator<<(
     std::ostream& stream,
-    const std::shared_ptr<MovableGameObject<nDimensions, BaseType>>& obj)
+    const std::shared_ptr<MovableGameObject<nDimensions, BaseBaseType>>& obj)
 {
     return stream
         << "MovableGameObjectPtr { name: \""

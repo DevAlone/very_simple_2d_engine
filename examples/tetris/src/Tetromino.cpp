@@ -52,18 +52,6 @@ std::shared_ptr<Tetromino> Tetromino::createRandom(
     return std::make_shared<Tetromino>(obj->position, obj->pieceSize, obj->color, obj->shape);
 }*/
 
-void Tetromino::move(const game_math::Vector<2, BaseType>& direction)
-{
-    setPosition(getPosition() + direction);
-    for (const auto& row : tetroChildren.getData()) {
-        for (auto& child : row.getData()) {
-            if (child) {
-                child->setPosition(child->getPosition() + direction);
-            }
-        }
-    }
-}
-
 void Tetromino::rotateClockwise()
 {
     shape.rotateClockwise();
@@ -76,6 +64,40 @@ void Tetromino::rotateCounterclockwise()
     shape.rotateCounterclockwise();
     tetroChildren.rotateCounterclockwise();
     initChildrenPositions();
+}
+
+void Tetromino::removeChild(GameObject* child)
+{
+    MovableGameObject::removeChild(child);
+    if (child) {
+        for (size_t nRow = 0; nRow < blocksPerTetromino; ++nRow) {
+            for (size_t nColumn = 0; nColumn < blocksPerTetromino; ++nColumn) {
+                auto& tetroChild = tetroChildren[nRow][nColumn];
+                if (tetroChild.get() == child) {
+                    tetroChild.reset();
+                    shape[nRow][nColumn] = 0;
+                }
+            }
+        }
+    }
+
+    // remove empty objects from the scene
+    bool isEmpty = true;
+
+    for (size_t nRow = 0; nRow < blocksPerTetromino; ++nRow) {
+        for (size_t nColumn = 0; nColumn < blocksPerTetromino; ++nColumn) {
+            if (shape[nRow][nColumn]) {
+                isEmpty = false;
+                break;
+            }
+        }
+    }
+
+    if (isEmpty) {
+        if (getParent()) {
+            getParent()->removeChild(this);
+        }
+    }
 }
 
 void Tetromino::initChildrenPositions()
